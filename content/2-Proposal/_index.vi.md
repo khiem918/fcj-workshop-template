@@ -10,25 +10,25 @@ pre: " <b> 2. </b> "
 ## Nền tảng chia sẻ video với tìm kiếm ngữ nghĩa, triển khai trên AWS ECS Fargate
 
 ### 1. Tóm tắt điều hành
-VideoPlatformServer là dự án cá nhân được xây dựng trong kỳ thực tập nhằm thực hành kiến trúc microservice thực chiến trên AWS. Hệ thống gồm 2 service độc lập giao tiếp qua gRPC song hướng: `api_service` (NestJS 11 + Apollo GraphQL) đảm nhận xác thực, quản lý video, upload/transcode; `search_service` (Python FastAPI) đảm nhận tìm kiếm lai (kết hợp từ khóa và vector ngữ nghĩa qua Qdrant). Toàn bộ hạ tầng chạy trên AWS ECS Fargate, đứng sau CloudFront + Application Load Balancer, dùng RDS PostgreSQL, ElastiCache (Valkey), Amazon MQ (RabbitMQ) cho giao tiếp bất đồng bộ liên service, và CI/CD tự động qua GitHub Actions.
+VideoPlatformServer là dự án cá nhân được xây dựng trong kỳ thực tập nhằm thực hành kiến trúc microservice thực chiến trên AWS. Hệ thống gồm 2 service độc lập giao tiếp qua gRPC song hướng: **api_service** (NestJS 11 + Apollo GraphQL) đảm nhận xác thực, quản lý video, upload/transcode; **search_service** (Python FastAPI) đảm nhận tìm kiếm lai (kết hợp từ khóa và vector ngữ nghĩa qua Qdrant). Toàn bộ hạ tầng chạy trên AWS ECS Fargate, đứng sau CloudFront + Application Load Balancer, dùng RDS PostgreSQL, ElastiCache (Valkey), Amazon MQ (RabbitMQ) cho giao tiếp bất đồng bộ liên service, và CI/CD tự động qua GitHub Actions.
 
 ### 2. Tuyên bố vấn đề
 *Vấn đề hiện tại*
 Phần lớn dự án cá nhân/học tập về AWS chỉ dừng ở mức serverless đơn giản (Lambda + API Gateway + S3), thiếu các bài toán khó gặp trong hệ thống production thật: xử lý file lớn bất đồng bộ, giao tiếp liên service qua gRPC/message queue, tìm kiếm ngữ nghĩa bằng vector database, và vận hành container trên nhiều môi trường (local Docker Compose, staging, production AWS).
 
 *Giải pháp*
-Hệ thống này giải quyết các bài toán đó bằng kiến trúc 2 service tách biệt: `api_service` xử lý luồng upload video qua presigned URL lên S3, sau đó enqueue job transcode bất đồng bộ bằng BullMQ (chạy trên Redis/ElastiCache Valkey) để chuyển video sang định dạng MPEG-DASH bằng FFmpeg. Khi metadata video thay đổi, `api_service` publish message qua RabbitMQ (Amazon MQ) để `search_service` đồng bộ lại chỉ mục; `search_service` lấy metadata đầy đủ qua gRPC, sinh embedding và upsert vào Qdrant vector database để phục vụ tìm kiếm lai (kết hợp điểm từ khóa và độ tương đồng vector). Toàn bộ được triển khai container hoá trên ECS Fargate, có CDN (CloudFront) và domain riêng (Route 53 + ACM) phía trước.
+Hệ thống này giải quyết các bài toán đó bằng kiến trúc 2 service tách biệt: **api_service** xử lý luồng upload video qua presigned URL lên S3, sau đó enqueue job transcode bất đồng bộ bằng BullMQ (chạy trên Redis/ElastiCache Valkey) để chuyển video sang định dạng MPEG-DASH bằng FFmpeg. Khi metadata video thay đổi, **api_service** publish message qua RabbitMQ (Amazon MQ) để **search_service** đồng bộ lại chỉ mục; **search_service** lấy metadata đầy đủ qua gRPC, sinh embedding và upsert vào Qdrant vector database để phục vụ tìm kiếm lai (kết hợp điểm từ khóa và độ tương đồng vector). Toàn bộ được triển khai container hoá trên ECS Fargate, có CDN (CloudFront) và domain riêng (Route 53 + ACM) phía trước.
 
 *Lợi ích và giá trị*
 Dự án mang lại kỹ năng thực chiến về thiết kế microservice, giao tiếp bất đồng bộ, vector search/AI, và vận hành AWS production (IAM/OIDC, VPC networking, container orchestration, CI/CD) — vượt xa phạm vi một demo serverless đơn giản. Sản phẩm hoàn chỉnh có thể dùng làm dự án portfolio, đồng thời là nền tảng để mở rộng thêm tính năng (recommendation, live streaming...) sau kỳ thực tập.
 
 ### 3. Kiến trúc giải pháp
-Người dùng truy cập qua domain riêng (Route 53) → CloudFront (CDN, TLS) → Application Load Balancer (định tuyến theo path `/graphql/*` cho `api_service`, `/api/*` cho `search_service`) → ECS Fargate cluster gồm 3 service: `api-service`, `search-service`, và `qdrant` (vector database tự triển khai, lưu dữ liệu bền vững trên EFS). Hai service ứng dụng giao tiếp gRPC song hướng và cùng kết nối tới RDS PostgreSQL (lưu metadata quan hệ), ElastiCache Valkey (session, hàng đợi BullMQ, cache), và Amazon MQ (đồng bộ metadata bất đồng bộ). Video gốc và bản đã transcode lưu trên S3, phục vụ qua CloudFront. Toàn bộ compute chạy trong private subnet, ra ngoài qua VPC Endpoints thay vì NAT Gateway để tối ưu chi phí.
+Người dùng truy cập qua domain riêng (Route 53) → CloudFront (CDN, TLS) → Application Load Balancer (định tuyến theo path **/graphql/\*** cho **api_service**, **/api/\*** cho **search_service**) → ECS Fargate cluster gồm 3 service: **api-service**, **search-service**, và **qdrant** (vector database tự triển khai, lưu dữ liệu bền vững trên EFS). Hai service ứng dụng giao tiếp gRPC song hướng và cùng kết nối tới RDS PostgreSQL (lưu metadata quan hệ), ElastiCache Valkey (session, hàng đợi BullMQ, cache), và Amazon MQ (đồng bộ metadata bất đồng bộ). Video gốc và bản đã transcode lưu trên S3, phục vụ qua CloudFront. Toàn bộ compute chạy trong private subnet, ra ngoài qua VPC Endpoints thay vì NAT Gateway để tối ưu chi phí.
 
 ![Solution Architecture](/images/2-Proposal/solution_architecture.jpg)
 
 *Dịch vụ AWS sử dụng*
-- *Amazon ECS (Fargate/Fargate Spot)*: chạy container cho `api-service`, `search-service`, `qdrant`.
+- *Amazon ECS (Fargate/Fargate Spot)*: chạy container cho **api-service**, **search-service**, **qdrant**.
 - *Amazon ECR*: lưu trữ container image, quét lỗ hổng tự động (scan-on-push).
 - *Application Load Balancer + Amazon CloudFront*: định tuyến HTTP/GraphQL và CDN cho video.
 - *Amazon Route 53 + AWS Certificate Manager*: domain riêng và chứng chỉ TLS.
@@ -46,7 +46,7 @@ Người dùng truy cập qua domain riêng (Route 53) → CloudFront (CDN, TLS)
 - *api_service (NestJS + GraphQL)*: xác thực người dùng, quản lý video, sinh presigned URL upload, enqueue job transcode, expose GraphQL API, serve gRPC cho metadata.
 - *search_service (FastAPI)*: consume message từ RabbitMQ, gọi gRPC lấy metadata, sinh embedding, upsert Qdrant, expose REST API tìm kiếm lai.
 - *Qdrant*: vector database tự host trên Fargate, lưu embedding video, dữ liệu bền vững qua EFS mount.
-- *Worker transcode*: BullMQ worker (trong `api_service`) tải video thô từ S3, chạy FFmpeg chuyển sang DASH, tải kết quả lên S3.
+- *Worker transcode*: BullMQ worker (trong **api_service**) tải video thô từ S3, chạy FFmpeg chuyển sang DASH, tải kết quả lên S3.
 
 ### 4. Triển khai kỹ thuật
 *Các giai đoạn triển khai*

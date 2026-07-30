@@ -11,25 +11,25 @@ pre: " <b> 2. </b> "
 ## A Video Sharing Platform with Semantic Search, Deployed on AWS ECS Fargate
 
 ### 1. Executive Summary
-VideoPlatformServer is a personal project built during the internship to gain hands-on experience with production-grade microservice architecture on AWS. The system consists of two independent services communicating over bidirectional gRPC: `api_service` (NestJS 11 + Apollo GraphQL) handles authentication, video management, and upload/transcoding; `search_service` (Python FastAPI) handles hybrid search that combines keyword matching with semantic vector similarity via Qdrant. The entire stack runs on AWS ECS Fargate behind CloudFront and an Application Load Balancer, backed by RDS PostgreSQL, ElastiCache (Valkey), and Amazon MQ (RabbitMQ) for asynchronous inter-service messaging, with automated CI/CD through GitHub Actions.
+VideoPlatformServer is a personal project built during the internship to gain hands-on experience with production-grade microservice architecture on AWS. The system consists of two independent services communicating over bidirectional gRPC: **api_service** (NestJS 11 + Apollo GraphQL) handles authentication, video management, and upload/transcoding; **search_service** (Python FastAPI) handles hybrid search that combines keyword matching with semantic vector similarity via Qdrant. The entire stack runs on AWS ECS Fargate behind CloudFront and an Application Load Balancer, backed by RDS PostgreSQL, ElastiCache (Valkey), and Amazon MQ (RabbitMQ) for asynchronous inter-service messaging, with automated CI/CD through GitHub Actions.
 
 ### 2. Problem Statement
 ### What's the Problem?
 Most personal or learning-oriented AWS projects stop at simple serverless setups (Lambda + API Gateway + S3), missing the harder problems found in real production systems: asynchronous large-file processing, inter-service communication over gRPC and message queues, semantic search backed by a vector database, and running containers consistently across multiple environments (local Docker Compose, staging, and AWS production).
 
 ### The Solution
-VideoPlatformServer addresses these problems with two clearly separated services. `api_service` handles the video upload flow via S3 presigned URLs, then enqueues an asynchronous transcoding job with BullMQ (running on Redis/ElastiCache Valkey) that converts the video into MPEG-DASH using FFmpeg. When video metadata changes, `api_service` publishes a message through RabbitMQ (Amazon MQ) so that `search_service` can re-index it; `search_service` fetches the full metadata over gRPC, generates embeddings, and upserts them into the Qdrant vector database to power hybrid search (combining keyword scores with vector similarity). Everything is containerized and deployed on ECS Fargate, fronted by a CDN (CloudFront) and a custom domain (Route 53 + ACM).
+VideoPlatformServer addresses these problems with two clearly separated services. **api_service** handles the video upload flow via S3 presigned URLs, then enqueues an asynchronous transcoding job with BullMQ (running on Redis/ElastiCache Valkey) that converts the video into MPEG-DASH using FFmpeg. When video metadata changes, **api_service** publishes a message through RabbitMQ (Amazon MQ) so that **search_service** can re-index it; **search_service** fetches the full metadata over gRPC, generates embeddings, and upserts them into the Qdrant vector database to power hybrid search (combining keyword scores with vector similarity). Everything is containerized and deployed on ECS Fargate, fronted by a CDN (CloudFront) and a custom domain (Route 53 + ACM).
 
 ### Benefits and Value
 The project delivers practical skills in microservice design, asynchronous messaging, vector/AI search, and AWS production operations (IAM/OIDC, VPC networking, container orchestration, CI/CD) — well beyond the scope of a simple serverless demo. The finished system doubles as a portfolio project and provides a foundation for future extensions such as recommendations or live streaming after the internship.
 
 ### 3. Solution Architecture
-Users reach the platform through a custom domain (Route 53) → CloudFront (CDN, TLS) → Application Load Balancer, which routes by path (`/graphql/*` to `api_service`, `/api/*` to `search_service`) → an ECS Fargate cluster running three services: `api-service`, `search-service`, and `qdrant` (a self-hosted vector database persisting data on EFS). The two application services communicate over bidirectional gRPC and both connect to RDS PostgreSQL (relational metadata), ElastiCache Valkey (sessions, BullMQ queues, caching), and Amazon MQ (asynchronous metadata synchronization). Raw and transcoded video files are stored in S3 and served through CloudFront. All compute runs in private subnets and reaches AWS services through VPC Endpoints rather than a NAT Gateway, for cost efficiency.
+Users reach the platform through a custom domain (Route 53) → CloudFront (CDN, TLS) → Application Load Balancer, which routes by path (**/graphql/\*** to **api_service**, **/api/\*** to **search_service**) → an ECS Fargate cluster running three services: **api-service**, **search-service**, and **qdrant** (a self-hosted vector database persisting data on EFS). The two application services communicate over bidirectional gRPC and both connect to RDS PostgreSQL (relational metadata), ElastiCache Valkey (sessions, BullMQ queues, caching), and Amazon MQ (asynchronous metadata synchronization). Raw and transcoded video files are stored in S3 and served through CloudFront. All compute runs in private subnets and reaches AWS services through VPC Endpoints rather than a NAT Gateway, for cost efficiency.
 
 ![VideoPlatformServer Solution Architecture](/images/2-Proposal/solution_architecture.jpg)
 
 ### AWS Services Used
-- **Amazon ECS (Fargate/Fargate Spot)**: Runs containers for `api-service`, `search-service`, and `qdrant`.
+- **Amazon ECS (Fargate/Fargate Spot)**: Runs containers for **api-service**, **search-service**, and **qdrant**.
 - **Amazon ECR**: Stores container images with automatic vulnerability scanning (scan-on-push).
 - **Application Load Balancer + Amazon CloudFront**: HTTP/GraphQL routing and CDN delivery for video.
 - **Amazon Route 53 + AWS Certificate Manager**: Custom domain and TLS certificates.
@@ -47,14 +47,14 @@ Users reach the platform through a custom domain (Route 53) → CloudFront (CDN,
 - **api_service (NestJS + GraphQL)**: User authentication, video management, presigned upload URL generation, transcoding job enqueueing, GraphQL API, and a gRPC server for metadata.
 - **search_service (FastAPI)**: Consumes RabbitMQ messages, fetches metadata over gRPC, generates embeddings, upserts into Qdrant, and exposes a REST hybrid-search API.
 - **Qdrant**: Self-hosted vector database on Fargate storing video embeddings, with data persisted through an EFS mount.
-- **Transcoding worker**: A BullMQ worker inside `api_service` that downloads raw video from S3, runs FFmpeg to produce DASH output, and uploads the results back to S3.
+- **Transcoding worker**: A BullMQ worker inside **api_service** that downloads raw video from S3, runs FFmpeg to produce DASH output, and uploads the results back to S3.
 
 ### 4. Technical Implementation
 **Implementation Phases**
 The project has two parts — building the application (two services plus the database schema) and setting up the AWS infrastructure — each following 4 phases:
 - Research and Architecture Design: Study microservice patterns, gRPC, message queues, and vector search approaches suited to a video workload.
 - Cost Estimation and Feasibility Check: Estimate ECS Fargate/RDS/ElastiCache/Amazon MQ costs, and evaluate Fargate Spot and VPC Endpoints (instead of a NAT Gateway) as optimizations.
-- Architecture Refinement: Optimize the ALB health check (a dedicated `/health` endpoint, since Apollo GraphQL does not suit a default GET probe) and apply least-privilege security group rules.
+- Architecture Refinement: Optimize the ALB health check (a dedicated **/health** endpoint, since Apollo GraphQL does not suit a default GET probe) and apply least-privilege security group rules.
 - Develop, Test, and Deploy: Implement both services, write tests, containerize with Docker, and set up CI/CD (GitHub Actions) to build and deploy to ECS automatically.
 
 **Technical Requirements**
@@ -65,7 +65,7 @@ The project has two parts — building the application (two services plus the da
 ### 5. Timeline & Milestones
 **Project Timeline**
 - **15/06 – 21/06/2026 (Week 1)**: Design the microservice architecture and database schema; create the VPC, subnets, and security groups in the AWS Console.
-- **22/06 – 05/07/2026 (Weeks 2–3)**: Develop `api_service` (auth, video upload, GraphQL API) and scaffold `search_service` (FastAPI + gRPC).
+- **22/06 – 05/07/2026 (Weeks 2–3)**: Develop **api_service** (auth, video upload, GraphQL API) and scaffold **search_service** (FastAPI + gRPC).
 - **06/07 – 19/07/2026 (Weeks 4–5)**: Complete the asynchronous transcoding pipeline (BullMQ + FFmpeg), integrate RabbitMQ and Qdrant for semantic search, and set up the ECS cluster, ALB, CloudFront, and CI/CD.
 - **20/07 – 31/07/2026 (Weeks 6–6.5)**: Run end-to-end tests on staging, fix networking and health-check configuration issues, finalize documentation, and hand over.
 
