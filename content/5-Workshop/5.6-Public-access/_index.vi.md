@@ -19,14 +19,14 @@ Trình duyệt → Route 53 → CloudFront → ALB      → ECS task
 
 Target group là nơi ALB chuyển tiếp lưu lượng tới. Tạo hai cái — console **EC2** → **Target groups** → **Create target group**.
 
-| Mục | `api-service` | `search-service` |
+| Mục | **api-service** | **search-service** |
 |---|---|---|
 | Target type | **IP addresses** | **IP addresses** |
-| Name | `vsp-api-tg` | `vsp-search-tg` |
+| Name | **vsp-api-tg** | **vsp-search-tg** |
 | Protocol / port | HTTP / 8080 | HTTP / 8000 |
 | VPC | VPC đã tạo ở 5.3.1 | như trên |
 | Protocol version | HTTP1 | HTTP1 |
-| Health check path | `/health` | `/api/v1/health` |
+| Health check path | **/health** | **/api/v1/health** |
 | Healthy threshold | 2 | 2 |
 | Unhealthy threshold | 3 | 3 |
 | Timeout | 5 giây | 5 giây |
@@ -46,16 +46,16 @@ Console **EC2** → **Load balancers** → **Create load balancer** → **Applic
 
 | Mục | Giá trị |
 |---|---|
-| Name | `vsp-alb` |
+| Name | **vsp-alb** |
 | Scheme | **Internet-facing** |
 | IP address type | IPv4 |
 | VPC | VPC đã tạo ở 5.3.1 |
-| Mappings | `ap-southeast-1a` → `10.0.1.0/24`, `ap-southeast-1b` → `10.0.2.0/24` |
-| Security group | `vsp-alb-sg` |
+| Mappings | **ap-southeast-1a** → **10.0.1.0/24**, **ap-southeast-1b** → **10.0.2.0/24** |
+| Security group | **vsp-alb-sg** |
 | Listener | HTTPS : 443 |
-| Default action | Forward tới `vsp-api-tg` |
-| Certificate | chứng chỉ `ap-southeast-1` từ mục 5.3.4 |
-| Security policy | `ELBSecurityPolicy-TLS13-1-2-2021-06` |
+| Default action | Forward tới **vsp-api-tg** |
+| Certificate | chứng chỉ **ap-southeast-1** từ mục 5.3.4 |
+| Security policy | **ELBSecurityPolicy-TLS13-1-2-2021-06** |
 
 Chọn **cả hai public subnet**. Đây chính là lý do mục 5.3.1 tạo ra hai cái — ALB không thể được tạo với chỉ một subnet.
 
@@ -68,8 +68,8 @@ Default action đang gửi mọi thứ về API. Thêm một rule để lưu lư
 | Mục | Giá trị |
 |---|---|
 | Priority | 100 |
-| Condition | Path là `/api/v1/search*` |
-| Action | Forward tới `vsp-search-tg` |
+| Condition | Path là **/api/v1/search\*** |
+| Action | Forward tới **vsp-search-tg** |
 
 Rule được xét theo priority, số nhỏ trước, và default action chỉ chạy khi không rule nào khớp.
 
@@ -77,25 +77,25 @@ Rule được xét theo priority, số nhỏ trước, và default action chỉ 
 
 #### Gắn ECS service vào target group
 
-Quay lại **ECS** → `vsp-ecs-cluster` → **Services** → `api-service` → **Update**:
+Quay lại **ECS** → **vsp-ecs-cluster** → **Services** → **api-service** → **Update**:
 
 | Mục | Giá trị |
 |---|---|
 | Load balancer type | Application Load Balancer |
-| Load balancer | `vsp-alb` |
-| Container to load balance | `api-service-container` 8080 |
-| Target group | `vsp-api-tg` |
+| Load balancer | **vsp-alb** |
+| Container to load balance | **api-service-container** 8080 |
+| Target group | **vsp-api-tg** |
 | Health check grace period | 120 |
 
 ![ser tar api](/images/5-Workshop/5.6-Public-access/ser-tar-api.png)
 
 ![ser tar search](/images/5-Workshop/5.6-Public-access/ser-tar-search.png)
 
-Làm tương tự với `search-service`: container `search-service-container` 8000, target group `vsp-search-tg`, và grace period **180** giây.
+Làm tương tự với **search-service**: container **search-service-container** 8000, target group **vsp-search-tg**, và grace period **180** giây.
 
 **Health check grace period** bảo ECS bỏ qua kết quả health check của load balancer trong khoảng thời gian đó sau khi task khởi động. Không có nó, ALB sẽ đánh dấu task đang boot là unhealthy, ECS giết nó đi, khởi động cái khác, và service không bao giờ ổn định được. Search service cần khoảng thời gian dài hơn vì phải nạp mô hình.
 
-Chờ cả hai target group hiển thị `healthy`:
+Chờ cả hai target group hiển thị **healthy**:
 
 ![target khỏe mạnh](/images/5-Workshop/5.6-Public-access/health.png)
 
@@ -106,7 +106,7 @@ Trước khi tạo distribution, hãy tạo danh tính mà CloudFront dùng đ�
 
 | Mục | Giá trị |
 |---|---|
-| Name | `vsp-s3-oac` |
+| Name | **vsp-s3-oac** |
 | Origin type | S3 |
 | Signing behavior | Sign requests (recommended) |
 
@@ -122,38 +122,38 @@ Origin Access Control là bản thay thế cho Origin Access Identity cũ, và n
 
 | | ALB origin | S3 origin |
 |---|---|---|
-| Origin domain | `vsp-alb-…elb.amazonaws.com` | bucket của bạn |
+| Origin domain | **vsp-alb-…elb.amazonaws.com** | bucket của bạn |
 | Origin path | để trống | để trống |
 | Protocol | HTTPS only | — |
-| Origin access | — | Origin access control, `vsp-s3-oac` |
-| Name | `alb-origin` | `s3-origin` |
+| Origin access | — | Origin access control, **vsp-s3-oac** |
+| Name | **alb-origin** | **s3-origin** |
 
 **Default cache behavior** — cái này phục vụ API:
 
 | Mục | Giá trị |
 |---|---|
-| Origin | `alb-origin` |
+| Origin | **alb-origin** |
 | Viewer protocol policy | Redirect HTTP to HTTPS |
 | Allowed methods | GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE |
 | Cache policy | **CachingDisabled** |
 | Origin request policy | **AllViewerExceptHostHeader** |
 
-`AllViewerExceptHostHeader` chuyển tiếp mọi header, cookie và query string về ALB, trừ `Host`. Phần ngoại lệ này rất quan trọng: chuyển tiếp header `Host` của người dùng tới một ALB origin sẽ phá vỡ định tuyến, vì ALB mong đợi chính hostname của nó.
+**AllViewerExceptHostHeader** chuyển tiếp mọi header, cookie và query string về ALB, trừ **Host**. Phần ngoại lệ này rất quan trọng: chuyển tiếp header **Host** của người dùng tới một ALB origin sẽ phá vỡ định tuyến, vì ALB mong đợi chính hostname của nó.
 
 **Additional behaviors** — thêm hai cái nữa:
 
 | Path pattern | Origin | Cache policy | Methods |
 |---|---|---|---|
-| `/public/*` | `s3-origin` | CachingOptimized | GET, HEAD |
-| `/private/*` | `s3-origin` | CachingOptimized | GET, HEAD |
+| **/public/\*** | **s3-origin** | CachingOptimized | GET, HEAD |
+| **/private/\*** | **s3-origin** | CachingOptimized | GET, HEAD |
 
 **Settings**:
 
 | Mục | Giá trị |
 |---|---|
 | Price class | Use only North America, Europe, Asia |
-| Alternate domain name (CNAME) | `app.example.com` |
-| Custom SSL certificate | chứng chỉ **`us-east-1`** từ mục 5.3.4 |
+| Alternate domain name (CNAME) | **app.example.com** |
+| Custom SSL certificate | chứng chỉ **us-east-1** từ mục 5.3.4 |
 | Security policy | TLSv1.2_2021 |
 | Default root object | để trống |
 
@@ -191,7 +191,7 @@ Dán vào **S3** → bucket của bạn → **Permissions** → **Bucket policy*
 
 | Mục | Giá trị |
 |---|---|
-| Record name | `app` |
+| Record name | **app** |
 | Record type | A |
 | Alias | Yes |
 | Route traffic to | Alias to CloudFront distribution |
@@ -207,6 +207,6 @@ curl -I https://app.example.com/health
 curl -s https://app.example.com/api/v1/health
 ```
 
-Lệnh đầu phải trả về các địa chỉ IP của CloudFront; lệnh thứ hai trả `200 OK` từ API qua ALB; lệnh thứ ba trả về search service, xác nhận listener rule hoạt động.
+Lệnh đầu phải trả về các địa chỉ IP của CloudFront; lệnh thứ hai trả **200 OK** từ API qua ALB; lệnh thứ ba trả về search service, xác nhận listener rule hoạt động.
 
 ![ping](/images/5-Workshop/5.6-Public-access/ping.png)

@@ -5,53 +5,28 @@ weight: 1
 chapter: false
 pre: " <b> 1.1. </b> "
 ---
-**⚠️ Lưu ý: Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng không sao chép nguyên văn cho bài báo cáo của bạn kể cả warning này.**
-
 
 ### Mục tiêu tuần 1:
 
-* Kết nối, làm quen với các thành viên trong First Cloud AI Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+* Chốt phạm vi sản phẩm **VideoPlatformServer** và mô hình hoá dữ liệu cho toàn hệ thống.
+* Dựng khung **api_service** trên NestJS 11 với GraphQL code-first.
+* Hoàn thiện luồng xác thực người dùng và quản lý phiên đăng nhập.
 
 ### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCAJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
 
+| Thứ | Công việc | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu |
+| --- | --- | --- | --- | --- |
+| 2 | - Khảo sát yêu cầu, chốt phạm vi sản phẩm: upload → transcode → phát video → tìm kiếm <br> - Vẽ sơ đồ luồng dữ liệu và xác định ranh giới giữa hai service | 22/06/2026 | 22/06/2026 | |
+| 3 | - Khởi tạo project NestJS 11 <br> - Cấu hình **ConfigModule** kèm validation cho biến môi trường <br> - Bật GraphQL code-first, tự sinh **schema.gql** | 23/06/2026 | 23/06/2026 | |
+| 4 | - Thiết kế schema Prisma cho PostgreSQL: <br>&emsp; + **User**, **Video**, **VideoInformation** <br>&emsp; + **Comment**, **LikeVideo**, **Subscribe**, **WatchHistory** <br>&emsp; + Các enum trạng thái: **UploadVideoStatus**, **ProcessingStatus**, **VideoVisibility** <br> - Chạy migration đầu tiên | 24/06/2026 | 25/06/2026 | |
+| 5 | - Module **auth**: xác thực Firebase ID token <br> - **SessionService** lưu phiên trên Redis <br> - Guard và decorator **@CurrentUser** dùng cho resolver | 25/06/2026 | 26/06/2026 |  |
+| 6 | - Viết unit test cho **auth.service**, **auth.resolver**, **session.service** <br> - **Thực hành:** dựng môi trường local bằng Docker Compose (PostgreSQL, Redis, RabbitMQ) | 26/06/2026 | 26/06/2026 | |
 
 ### Kết quả đạt được tuần 1:
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+* Chốt được phạm vi sản phẩm và tách hệ thống thành hai service có trách nhiệm rõ ràng: **api_service** phụ trách nghiệp vụ và dữ liệu quan hệ, **search_service** phụ trách tìm kiếm ngữ nghĩa.
+* Hoàn thành schema dữ liệu với 11 bảng và 8 enum trạng thái. Việc tách **Video** và **VideoInformation** thành hai bảng giúp phần metadata thay đổi thường xuyên không làm khoá bảng chính.
+* **api_service** chạy được ở local, tự sinh GraphQL schema từ code nên không phải duy trì file schema thủ công.
+* Xác thực hoạt động đầy đủ: token do Firebase cấp được verify ở phía server, phiên đăng nhập lưu trên Redis nên có thể thu hồi mà không cần chờ token hết hạn.
+* Toàn bộ thành phần phụ thuộc (PostgreSQL, Redis, RabbitMQ) đã chạy được bằng một lệnh **docker compose up**, rút ngắn thời gian thiết lập môi trường cho các tuần sau.
+* Bài học rút ra: thiết kế enum trạng thái ngay từ đầu quan trọng hơn tôi nghĩ — luồng transcode ở tuần 2 dựa hoàn toàn vào các trạng thái này.

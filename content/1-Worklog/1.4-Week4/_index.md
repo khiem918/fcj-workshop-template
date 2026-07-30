@@ -1,55 +1,32 @@
 ---
 title: "Week 4 Worklog"
 date: 2024-01-01
-weight: 1
+weight: 4
 chapter: false
 pre: " <b> 1.4. </b> "
 ---
-**⚠️ Note: The following information is for reference purposes only. Please do not copy verbatim for your own report, including this warning.**
-
 
 ### Week 4 Objectives:
 
-* Connect and get acquainted with members of First Cloud AI Journey.
-* Understand basic AWS services, how to use the console & CLI.
+* Move into the infrastructure phase: secure the AWS account and build the network foundation.
+* Design a VPC whose private subnet has no route to the Internet.
+* Prepare the domain name and certificates for the system.
 
 ### Tasks to be carried out this week:
-| Day | Task                                                                                                                                                                                                   | Start Date | Completion Date | Reference Material                        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------- | ----------------------------------------- |
-| 2   | - Get acquainted with FCAJ members <br> - Read and take note of internship unit rules and regulations                                                                                                   | 08/11/2025 | 08/11/2025      |
-| 3   | - Learn about AWS and its types of services <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                              | 08/12/2025 | 08/12/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Create AWS Free Tier account <br> - Learn about AWS Console & AWS CLI <br> - **Practice:** <br>&emsp; + Create AWS account <br>&emsp; + Install & configure AWS CLI <br> &emsp; + How to use AWS CLI | 08/13/2025 | 08/13/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Learn basic EC2: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - SSH connection methods to EC2 <br> - Learn about Elastic IP   <br>                            | 08/14/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Practice:** <br>&emsp; + Launch an EC2 instance <br>&emsp; + Connect via SSH <br>&emsp; + Attach an EBS volume                                                                                     | 08/15/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
 
+| Day | Task | Start Date | Completion Date | Reference Material |
+| --- | --- | --- | --- | --- |
+| 2 | - Set up the AWS account: enable MFA, create an IAM user instead of using root <br> - Write a least-privilege policy for deployment <br> - Install and configure the AWS CLI <br> - Estimate cost with the AWS Pricing Calculator | 07/13/2026 | 07/13/2026 | <https://000002.awsstudygroup.com/en/> <br> <https://000048.awsstudygroup.com/en/> <br> <https://000011.awsstudygroup.com/en/> <br> <https://000007.awsstudygroup.com/en/> |
+| 3 | - Create the **10.0.0.0/16** VPC <br> - Two public subnets across two Availability Zones plus one private subnet <br> - Internet Gateway and the two matching route tables | 07/14/2026 | 07/14/2026 | <https://000003.awsstudygroup.com/en/> |
+| 4 | - Design nine security groups that reference each other rather than CIDR ranges: <br>&emsp; + **alb-sg**, **ecs-tasks-sg**, **qdrant-sg** <br>&emsp; + **grpc-api-sg**, **grpc-search-sg** <br>&emsp; + **rds-sg**, two **redis-sg**, **rabbitmq-sg** | 07/15/2026 | 07/15/2026 | <https://000003.awsstudygroup.com/en/> |
+| 5 | - Create eight interface VPC endpoints and one S3 gateway endpoint <br> - Compare the cost of endpoints against a NAT Gateway <br> - Enable Private DNS on every interface endpoint | 07/16/2026 | 07/17/2026 | <https://000003.awsstudygroup.com/en/> <br> <https://000034.awsstudygroup.com/en/> |
+| 6 | - Create the Route 53 hosted zone and DNS records for the domain <br> - Request ACM certificates in both **ap-southeast-1** and **us-east-1** <br> - Create a private hosted zone for internal service discovery | 07/17/2026 | 07/17/2026 | <https://000010.awsstudygroup.com/en/> |
 
 ### Week 4 Achievements:
 
-* Understood what AWS is and mastered the basic service groups: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Successfully created and configured an AWS Free Tier account.
-
-* Became familiar with the AWS Management Console and learned how to find, access, and use services via the web interface.
-
-* Installed and configured AWS CLI on the computer, including:
-  * Access Key
-  * Secret Key
-  * Default Region
-  * ...
-
-* Used AWS CLI to perform basic operations such as:
-
-  * Check account & configuration information
-  * Retrieve the list of regions
-  * View EC2 service
-  * Create and manage key pairs
-  * Check information about running services
-  * ...
-
-* Acquired the ability to connect between the web interface and CLI to manage AWS resources in parallel.
-* ...
+* The AWS account was secured from the start: root is not used for daily work, and the deployment permissions are scoped to exactly what is needed.
+* The network foundation is complete, with a private subnet that genuinely has no route out — no NAT Gateway, and every AWS service call travels through a VPC endpoint and stays inside the private network.
+* Nine security groups reference each other instead of opening IP ranges, so the rules stay correct when a resource changes address.
+* Understood why pulling one ECR image needs three endpoints: **ecr.api** for authentication, **ecr.dkr** for the registry protocol, and S3 for the layers themselves.
+* Domain and certificates are ready, including the CloudFront certificate that must live in **us-east-1** — an easily missed detail that only surfaces when the distribution is created, which is too late.
+* Lesson learned: VPC endpoints are not necessarily cheaper than a NAT Gateway once the endpoint count grows. What they buy is isolation, and that — not price — is the reason to choose them.

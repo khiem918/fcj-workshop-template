@@ -18,7 +18,7 @@ Set the following:
 
 | Setting | Value |
 |---|---|
-| IPv4 CIDR block | `10.0.0.0/16` |
+| IPv4 CIDR block | **10.0.0.0/16** |
 | IPv6 CIDR block | No IPv6 CIDR block |
 | Tenancy | Default |
 | DNS hostnames | Enabled |
@@ -28,7 +28,7 @@ Set the following:
 
 Choose **Create VPC** and wait for it to finish.
 
-Now create the subnets: two public subnets, `10.0.1.0/24` and `10.0.2.0/24`, and one private subnet, `10.0.10.0/24`.
+Now create the subnets: two public subnets, **10.0.1.0/24** and **10.0.2.0/24**, and one private subnet, **10.0.10.0/24**.
 
 ![subnet 1](/images/5-Workshop/5.3-Network/subnet1.png)
 

@@ -18,7 +18,7 @@ Thiết lập như sau:
 
 | Mục | Giá trị |
 |---|---|
-| IPv4 CIDR block | `10.0.0.0/16` |
+| IPv4 CIDR block | **10.0.0.0/16** |
 | IPv6 CIDR block | No IPv6 CIDR block |
 | Tenancy | Default |
 | DNS hostnames | Enabled |
@@ -28,7 +28,7 @@ Thiết lập như sau:
 
 Chọn **Create VPC** và chờ trình hướng dẫn chạy xong.
 
-Tạo subnet: hai public subnet là `10.0.1.0/24` và `10.0.2.0/24` và một private subnet là `10.0.10.0/24`.
+Tạo subnet: hai public subnet là **10.0.1.0/24** và **10.0.2.0/24** và một private subnet là **10.0.10.0/24**.
 
 ![subnet 1](/images/5-Workshop/5.3-Network/subnet1.png)
 

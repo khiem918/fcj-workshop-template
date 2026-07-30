@@ -16,18 +16,18 @@ Từ đó ta có danh sách cụ thể sau:
 
 | Endpoint | Loại | Dùng để |
 |---|---|---|
-| `com.amazonaws.ap-southeast-1.ecr.api` | Interface | Xác thực với ECR và phân giải image manifest |
-| `com.amazonaws.ap-southeast-1.ecr.dkr` | Interface | Docker Registry API dùng để kéo image |
-| `com.amazonaws.ap-southeast-1.s3` | **Gateway** | Tải chính các layer của image |
-| `com.amazonaws.ap-southeast-1.logs` | Interface | Đẩy log container lên CloudWatch |
-| `com.amazonaws.ap-southeast-1.ssm` | Interface | Đọc cấu hình từ Parameter Store |
-| `com.amazonaws.ap-southeast-1.kms` | Interface | Giải mã các tham số `SecureString` |
-| `com.amazonaws.ap-southeast-1.ssmmessages` | Interface | ECS Exec — mở shell vào task đang chạy |
-| `com.amazonaws.ap-southeast-1.ec2messages` | Interface | Kênh điều khiển của ECS Exec |
-| `com.amazonaws.ap-southeast-1.mq` | Interface | API quản lý của Amazon MQ |
+| **com.amazonaws.ap-southeast-1.ecr.api** | Interface | Xác thực với ECR và phân giải image manifest |
+| **com.amazonaws.ap-southeast-1.ecr.dkr** | Interface | Docker Registry API dùng để kéo image |
+| **com.amazonaws.ap-southeast-1.s3** | **Gateway** | Tải chính các layer của image |
+| **com.amazonaws.ap-southeast-1.logs** | Interface | Đẩy log container lên CloudWatch |
+| **com.amazonaws.ap-southeast-1.ssm** | Interface | Đọc cấu hình từ Parameter Store |
+| **com.amazonaws.ap-southeast-1.kms** | Interface | Giải mã các tham số **SecureString** |
+| **com.amazonaws.ap-southeast-1.ssmmessages** | Interface | ECS Exec — mở shell vào task đang chạy |
+| **com.amazonaws.ap-southeast-1.ec2messages** | Interface | Kênh điều khiển của ECS Exec |
+| **com.amazonaws.ap-southeast-1.mq** | Interface | API quản lý của Amazon MQ |
 
 {{% notice note %}}
-Việc kéo một image cần tới **ba** endpoint, không phải một. `ecr.api` lo phần xác thực và metadata, `ecr.dkr` phục vụ giao thức registry, còn bản thân các layer thì được lưu trên S3 — nên endpoint S3 là bắt buộc để kéo image, kể cả khi ứng dụng của bạn không hề đụng tới bucket nào. Thiếu endpoint S3 chính là nguyên nhân kinh điển khiến task xác thực ECR thành công rồi đứng im ở bước tải image.
+Việc kéo một image cần tới **ba** endpoint, không phải một. **ecr.api** lo phần xác thực và metadata, **ecr.dkr** phục vụ giao thức registry, còn bản thân các layer thì được lưu trên S3 — nên endpoint S3 là bắt buộc để kéo image, kể cả khi ứng dụng của bạn không hề đụng tới bucket nào. Thiếu endpoint S3 chính là nguyên nhân kinh điển khiến task xác thực ECR thành công rồi đứng im ở bước tải image.
 {{% /notice %}}
 
 Endpoint cho S3 thuộc loại **Gateway** chứ không phải Interface. Gateway endpoint hoạt động bằng cách thêm một route vào route table thay vì tạo network interface, và nó **miễn phí** — điều đáng lưu ý khi đọc phần chi phí bên dưới.
@@ -38,8 +38,8 @@ Interface endpoint thực chất là các network interface nằm trong subnet c
 
 | Tên | Port | Source |
 |---|---|---|
-| `vsp-vpce-sg` | 443 | `vsp-ecs-tasks-sg` |
-| `vsp-vpce-sg` | 443 | `vsp-qdrant-sg` |
+| **vsp-vpce-sg** | 443 | **vsp-ecs-tasks-sg** |
+| **vsp-vpce-sg** | 443 | **vsp-qdrant-sg** |
 
 Mọi API dịch vụ của AWS đều chạy trên HTTPS, nên chỉ cần mở port 443. Cả hai security group của task đều được liệt kê làm source vì task Qdrant cũng phải kéo image từ ECR và ghi log.
 
@@ -53,12 +53,12 @@ Với từng endpoint trong tám interface endpoint: console **VPC** → **Endpo
 |---|---|
 | Type | AWS services |
 | VPC | VPC đã tạo ở 5.3.1 |
-| Subnets | chỉ chọn Private subnet A (`10.0.10.0/24`) |
+| Subnets | chỉ chọn Private subnet A (**10.0.10.0/24**) |
 | Enable DNS name | **Tích chọn** |
-| Security group | `vsp-vpce-sg` |
+| Security group | **vsp-vpce-sg** |
 | Policy | Full access |
 
-**Enable DNS name** chính là tùy chọn khiến toàn bộ cơ chế này trở nên trong suốt với ứng dụng. Khi Private DNS được bật, một request tới `ecr.ap-southeast-1.amazonaws.com` từ bên trong VPC sẽ phân giải thành IP riêng của endpoint thay vì IP công khai. Container và AWS CLI của bạn không cần sửa cấu hình gì cả — chúng vẫn gọi đúng tên dịch vụ như bình thường, còn lưu lượng thì lặng lẽ ở lại bên trong VPC. Nếu tắt tùy chọn này, endpoint vẫn tồn tại nhưng không có gì đi qua nó.
+**Enable DNS name** chính là tùy chọn khiến toàn bộ cơ chế này trở nên trong suốt với ứng dụng. Khi Private DNS được bật, một request tới **ecr.ap-southeast-1.amazonaws.com** từ bên trong VPC sẽ phân giải thành IP riêng của endpoint thay vì IP công khai. Container và AWS CLI của bạn không cần sửa cấu hình gì cả — chúng vẫn gọi đúng tên dịch vụ như bình thường, còn lưu lượng thì lặng lẽ ở lại bên trong VPC. Nếu tắt tùy chọn này, endpoint vẫn tồn tại nhưng không có gì đi qua nó.
 
 Chỉ chọn **duy nhất private subnet**. Endpoint được tính phí theo từng subnet mà nó được đặt vào, nên chọn cả ba subnet sẽ làm chi phí tăng gấp ba mà chẳng được lợi gì — không có gì trong public subnet gọi API của AWS cả.
 
@@ -68,7 +68,7 @@ Endpoint S3 được cấu hình theo cách khác:
 
 | Mục | Giá trị |
 |---|---|
-| Service name | `com.amazonaws.ap-southeast-1.s3` |
+| Service name | **com.amazonaws.ap-southeast-1.s3** |
 | Type | **Gateway** |
 | VPC | VPC đã tạo ở 5.3.1 |
 | Route tables | chọn route table **private** |
@@ -78,11 +78,11 @@ Endpoint S3 được cấu hình theo cách khác:
 
 #### Kiểm chứng
 
-Cả chín endpoint đều phải ở trạng thái `available`:
+Cả chín endpoint đều phải ở trạng thái **available**:
 
 ![danh sách endpoint](/images/5-Workshop/5.3-Network/ep-list.png)
 
-Kiểm tra để chắc chắn mọi interface endpoint đều báo `PrivateDnsEnabled: true`. Một endpoint ở trạng thái `available` nhưng tắt Private DNS sẽ không mang bất kỳ lưu lượng nào, và lỗi sinh ra trông hệt như một timeout thông thường.
+Kiểm tra để chắc chắn mọi interface endpoint đều báo **PrivateDnsEnabled: true**. Một endpoint ở trạng thái **available** nhưng tắt Private DNS sẽ không mang bất kỳ lưu lượng nào, và lỗi sinh ra trông hệt như một timeout thông thường.
 
 #### Về chi phí
 
@@ -93,7 +93,7 @@ Một interface endpoint tính phí khoảng 0.01–0.013 USD mỗi giờ cho m�
 Vậy nếu chỉ xét giá, một NAT Gateway rẻ hơn tám interface endpoint. Cái mà endpoint đem lại là private subnet thực sự không có bất kỳ đường nào ra Internet — lưu lượng tới dịch vụ AWS không bao giờ đi qua mạng công cộng, và một container bị chiếm quyền cũng không thể gọi ra một máy chủ tùy ý bên ngoài. Gateway endpoint cho S3 lại miễn phí, mà S3 mới là nơi phần lớn dung lượng dữ liệu đi qua, nên phí xử lý dữ liệu vẫn ở mức thấp.
 
 {{% notice note %}}
-Nếu trong hệ thống của bạn chi phí quan trọng hơn việc cô lập đường ra Internet, hãy bỏ bớt những endpoint không cần thiết. `ssmmessages` và `ec2messages` chỉ tồn tại để phục vụ ECS Exec; nếu bạn không có ý định mở shell vào task đang chạy thì bỏ hai cái đó đi là tiết kiệm được hai endpoint. Hãy kiểm tra giá hiện hành tại [trang giá VPC](https://aws.amazon.com/vpc/pricing/) — các con số ở trên chỉ là ước lượng và áp dụng riêng cho `ap-southeast-1`.
+Nếu trong hệ thống của bạn chi phí quan trọng hơn việc cô lập đường ra Internet, hãy bỏ bớt những endpoint không cần thiết. **ssmmessages** và **ec2messages** chỉ tồn tại để phục vụ ECS Exec; nếu bạn không có ý định mở shell vào task đang chạy thì bỏ hai cái đó đi là tiết kiệm được hai endpoint. Hãy kiểm tra giá hiện hành tại [trang giá VPC](https://aws.amazon.com/vpc/pricing/) — các con số ở trên chỉ là ước lượng và áp dụng riêng cho **ap-southeast-1**.
 {{% /notice %}}
 
 #### Bước tiếp theo

@@ -10,7 +10,7 @@ pre: " <b> 5. </b> "
 
 #### Overview
 
-**VideoPlatformServer** is a video sharing platform built from two independent services: `api_service` (NestJS + Apollo GraphQL) handles authentication, video management, and asynchronous transcoding, while `search_service` (Python FastAPI) provides hybrid search that combines keyword matching with semantic vector similarity through Qdrant. The two services communicate over bidirectional gRPC and exchange metadata updates asynchronously through RabbitMQ.
+**VideoPlatformServer** is a video sharing platform built from two independent services: **api_service** (NestJS + Apollo GraphQL) handles authentication, video management, and asynchronous transcoding, while **search_service** (Python FastAPI) provides hybrid search that combines keyword matching with semantic vector similarity through Qdrant. The two services communicate over bidirectional gRPC and exchange metadata updates asynchronously through RabbitMQ.
 
 In this workshop, you will deploy that system end to end on AWS. Rather than a single-service demo, this walkthrough covers the problems that appear in real production workloads: running containers on **ECS Fargate**, connecting them to managed data stores inside a private VPC, handling asynchronous jobs and inter-service messaging, exposing the platform securely through a CDN, and automating deployments with CI/CD.
 
@@ -20,7 +20,7 @@ A key design decision throughout this workshop is that **all compute runs in pri
 
 + A **VPC** with public and private subnets, security groups, and VPC Endpoints for ECR, CloudWatch Logs, Systems Manager, and Amazon MQ.
 + A managed data layer: **Amazon RDS for PostgreSQL**, **Amazon ElastiCache for Valkey**, **Amazon MQ (RabbitMQ)**, and **Amazon EFS**.
-+ Three services on **Amazon ECS Fargate**: `api-service`, `search-service`, and a self-hosted **Qdrant** vector database backed by EFS.
++ Three services on **Amazon ECS Fargate**: **api-service**, **search-service**, and a self-hosted **Qdrant** vector database backed by EFS.
 + Public access through an **Application Load Balancer** and **Amazon CloudFront**, secured with a custom domain (Route 53) and TLS certificates (AWS Certificate Manager).
 + An automated **CI/CD pipeline** using GitHub Actions with an IAM OIDC federated role, so no static AWS access keys are stored anywhere.
 

@@ -10,13 +10,13 @@ pre : " <b> 5.5. </b> "
 
 | Service | Port container | CPU / bộ nhớ |
 |---|---|---|
-| `qdrant` | 6333 HTTP, 6334 gRPC | 0.25 vCPU / 2 GB |
-| `search-service` | 8000 HTTP, 50052 gRPC | 4 vCPU / 9 GB |
-| `api-service` | 8080 HTTP, 50051 gRPC | 2 vCPU / 5 GB |
+| **qdrant** | 6333 HTTP, 6334 gRPC | 0.25 vCPU / 2 GB |
+| **search-service** | 8000 HTTP, 50052 gRPC | 4 vCPU / 9 GB |
+| **api-service** | 8080 HTTP, 50051 gRPC | 2 vCPU / 5 GB |
 
-`search-service` được cấp nhiều tài nguyên nhất vì nó chạy mô hình embedding ngay trong tiến trình — `fastembed` nạp mô hình vào bộ nhớ và ngốn CPU trong lúc sinh vector. `api-service` cần dư địa cho việc transcode bằng FFmpeg. Qdrant khá nhẹ ở quy mô dữ liệu này.
+**search-service** được cấp nhiều tài nguyên nhất vì nó chạy mô hình embedding ngay trong tiến trình — **fastembed** nạp mô hình vào bộ nhớ và ngốn CPU trong lúc sinh vector. **api-service** cần dư địa cho việc transcode bằng FFmpeg. Qdrant khá nhẹ ở quy mô dữ liệu này.
 
-**Thứ tự dựng ở đây có ý nghĩa.** Qdrant phải chạy trước khi `search-service` khởi động, vì `search-service` kết nối tới nó ngay trong quá trình start. Hãy tạo các service theo đúng thứ tự trên trang này.
+**Thứ tự dựng ở đây có ý nghĩa.** Qdrant phải chạy trước khi **search-service** khởi động, vì **search-service** kết nối tới nó ngay trong quá trình start. Hãy tạo các service theo đúng thứ tự trên trang này.
 
 #### Tạo ECR repository
 
@@ -24,9 +24,9 @@ Console **ECR** → **Create repository**, làm ba lần:
 
 | Tên repository | Thiết lập |
 |---|---|
-| `video-platform/api-service` | Private, bật scan on push |
-| `video-platform/search-service` | Private, bật scan on push |
-| `video-platform/qdrant` | Private, bật scan on push |
+| **video-platform/api-service** | Private, bật scan on push |
+| **video-platform/search-service** | Private, bật scan on push |
+| **video-platform/qdrant** | Private, bật scan on push |
 
 **Scan on push** chạy quét lỗ hổng cho mọi image bạn đẩy lên, hoàn toàn không tính thêm phí. Không có lý do gì để tắt nó.
 
@@ -36,7 +36,7 @@ Các imgae sau khi được build bởi Github Action sẽ được lưu trữ t
 
 ![image trên ecr](/images/5-Workshop/5.5-ECS-deployment/ecr-images.png)
 
-Tag `:latest` chấp nhận được cho lần deploy thủ công đầu tiên này. Mục 5.7 sẽ chuyển sang tag theo commit SHA, đó mới là cách làm đúng cho mọi thứ cần lặp lại được — `:latest` khiến bạn không thể biết task đang chạy đến từ bản build nào, và việc rollback trở thành đoán mò.
+Tag **:latest** chấp nhận được cho lần deploy thủ công đầu tiên này. Mục 5.7 sẽ chuyển sang tag theo commit SHA, đó mới là cách làm đúng cho mọi thứ cần lặp lại được — **:latest** khiến bạn không thể biết task đang chạy đến từ bản build nào, và việc rollback trở thành đoán mò.
 
 #### Tạo các IAM role
 
@@ -44,7 +44,7 @@ ECS dùng hai role riêng biệt, và nhầm lẫn giữa chúng là nguồn gâ
 
 **Task execution role** được ECS agent dùng *trước khi* container của bạn khởi động — để kéo image, đọc tham số SSM và tạo log stream. **Task role** được chính mã ứng dụng dùng *trong lúc chạy* — ví dụ để gọi S3.
 
-Tạo `ecsTaskExecutionRole`: **IAM** → **Roles** → **Create role** → **AWS service** → **Elastic Container Service Task**. Gắn managed policy `AmazonECSTaskExecutionRolePolicy`, sau đó thêm một inline policy cho Parameter Store:
+Tạo **ecsTaskExecutionRole**: **IAM** → **Roles** → **Create role** → **AWS service** → **Elastic Container Service Task**. Gắn managed policy **AmazonECSTaskExecutionRolePolicy**, sau đó thêm một inline policy cho Parameter Store:
 
 ```
 {
@@ -79,9 +79,9 @@ Tạo `ecsTaskExecutionRole`: **IAM** → **Roles** → **Create role** → **AW
 }
 ```
 
-Khóa KMS ở đây là khóa mặc định `aws/ssm` của tài khoản, trừ khi bạn tự tạo khóa riêng; tìm ID của nó ở **KMS** → **AWS managed keys**.
+Khóa KMS ở đây là khóa mặc định **aws/ssm** của tài khoản, trừ khi bạn tự tạo khóa riêng; tìm ID của nó ở **KMS** → **AWS managed keys**.
 
-Tiếp theo tạo `vspTaskRole` với cùng trust policy, và cấp cho nó những quyền mà bản thân ứng dụng cần:
+Tiếp theo tạo **vspTaskRole** với cùng trust policy, và cấp cho nó những quyền mà bản thân ứng dụng cần:
 
 ```
 {
@@ -101,7 +101,7 @@ Tiếp theo tạo `vspTaskRole` với cùng trust policy, và cấp cho nó nh�
 }
 ```
 
-Khối `ssmmessages` bật tính năng ECS Exec, cho phép bạn mở shell bên trong một task đang chạy. Trên private subnet không có bastion host, đó là cách duy nhất để gỡ lỗi container một cách tương tác — và nên chuẩn bị sẵn trước khi có sự cố, thay vì lúc đã xảy ra rồi mới quay lại thêm.
+Khối **ssmmessages** bật tính năng ECS Exec, cho phép bạn mở shell bên trong một task đang chạy. Trên private subnet không có bastion host, đó là cách duy nhất để gỡ lỗi container một cách tương tác — và nên chuẩn bị sẵn trước khi có sự cố, thay vì lúc đã xảy ra rồi mới quay lại thêm.
 
 #### Tạo namespace cho service discovery
 
@@ -111,13 +111,13 @@ Ba service cần tìm thấy nhau theo tên. IP của task Fargate thay đổi s
 
 | Mục | Giá trị |
 |---|---|
-| Namespace name | `vsp.internal` |
+| Namespace name | **vsp.internal** |
 | Instance discovery | API calls and DNS queries in VPCs |
 | VPC | VPC đã tạo ở 5.3.1 |
 
 ![name space](/images/5-Workshop/5.5-ECS-deployment/namespace.png)
 
-Thao tác này tạo ra một Route 53 private hosted zone gắn vào VPC. Khi một ECS service đăng ký vào đó, mỗi task nhận một bản ghi `A`, nhờ vậy `api.vsp.internal` phân giải tới đúng IP hiện hành của task từ bất kỳ đâu bên trong VPC. Đây chính là thứ khiến các tham số `GRPC_SEARCH_URL` và `QDRANT_URL` ở mục 5.4 hoạt động được.
+Thao tác này tạo ra một Route 53 private hosted zone gắn vào VPC. Khi một ECS service đăng ký vào đó, mỗi task nhận một bản ghi **A**, nhờ vậy **api.vsp.internal** phân giải tới đúng IP hiện hành của task từ bất kỳ đâu bên trong VPC. Đây chính là thứ khiến các tham số **GRPC_SEARCH_URL** và **QDRANT_URL** ở mục 5.4 hoạt động được.
 
 #### Tạo cluster và log group
 
@@ -125,7 +125,7 @@ Console **ECS** → **Clusters** → **Create cluster**:
 
 | Mục | Giá trị |
 |---|---|
-| Cluster name | `vsp-ecs-cluster` |
+| Cluster name | **vsp-ecs-cluster** |
 | Infrastructure | AWS Fargate (serverless) |
 | Container Insights | Enabled |
 
@@ -269,7 +269,7 @@ Sau đó tạo ba CloudWatch log group — **CloudWatch** → **Log groups** →
 }
 ```
 
-Hãy ghim image Qdrant vào một phiên bản cụ thể thay vì dùng `:latest`. Một vector database tự nâng cấp lặng lẽ trong lúc redeploy có thể đổi định dạng chỉ mục ngay dưới chân bạn.
+Hãy ghim image Qdrant vào một phiên bản cụ thể thay vì dùng **:latest**. Một vector database tự nâng cấp lặng lẽ trong lúc redeploy có thể đổi định dạng chỉ mục ngay dưới chân bạn.
 
 #### Task definition 2 — search-service
 
@@ -443,9 +443,9 @@ Hãy ghim image Qdrant vào một phiên bản cụ thể thay vì dùng `:lates
 }
 ```
 
-Chú ý sự phân tách giữa `secrets` và `environment`. Các giá trị trong `secrets` được kéo từ Parameter Store lúc task khởi động và không bao giờ hiện ra trong console; còn giá trị trong `environment` được lưu thẳng trong task definition dưới dạng văn bản thuần. Bất cứ thứ gì chứa mật khẩu đều phải nằm ở `secrets`.
+Chú ý sự phân tách giữa **secrets** và **environment**. Các giá trị trong **secrets** được kéo từ Parameter Store lúc task khởi động và không bao giờ hiện ra trong console; còn giá trị trong **environment** được lưu thẳng trong task definition dưới dạng văn bản thuần. Bất cứ thứ gì chứa mật khẩu đều phải nằm ở **secrets**.
 
-Giá trị `startPeriod` 120 giây rất quan trọng với container này. `fastembed` tải và nạp mô hình embedding trong lần khởi động đầu tiên, mất hơn một phút. Nếu không cho đủ thời gian khởi động, health check sẽ thất bại ngay trong lúc mô hình đang nạp và ECS giết task trước khi nó kịp sẵn sàng — tạo ra vòng lặp restart vô tận trông y hệt một lỗi crash.
+Giá trị **startPeriod** 120 giây rất quan trọng với container này. **fastembed** tải và nạp mô hình embedding trong lần khởi động đầu tiên, mất hơn một phút. Nếu không cho đủ thời gian khởi động, health check sẽ thất bại ngay trong lúc mô hình đang nạp và ECS giết task trước khi nó kịp sẵn sàng — tạo ra vòng lặp restart vô tận trông y hệt một lỗi crash.
 
 #### Task definition 3 — api-service
 
@@ -669,14 +669,14 @@ Giá trị `startPeriod` 120 giây rất quan trọng với container này. `fas
 
 Trước khi API khởi động, schema phải tồn tại. Hãy chạy migration như một task chạy một lần, thay vì nhét nó vào bước khởi động container — một migration chạy mỗi lần task boot sẽ tự đua với chính nó ngay khi bạn có nhiều hơn một task.
 
-**Clusters** → `vsp-ecs-cluster` → **Tasks** → **Run new task**:
+**Clusters** → **vsp-ecs-cluster** → **Tasks** → **Run new task**:
 
 | Mục | Giá trị |
 |---|---|
 | Launch type | FARGATE |
-| Task definition | `vsp-api-service` |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-ecs-tasks-sg` |
+| Task definition | **vsp-api-service** |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-ecs-tasks-sg** |
 | Public IP | Disabled |
 
 Ở phần **Container overrides**, đặt command thành:
@@ -685,26 +685,26 @@ Trước khi API khởi động, schema phải tồn tại. Hãy chạy migratio
 npx,prisma,migrate,deploy
 ```
 
-Console yêu cầu danh sách ngăn cách bằng dấu phẩy, không phải một chuỗi shell. Chạy task rồi theo dõi log group `/ecs/vsp-api-service` trên CloudWatch cho tới khi nó kết thúc với exit code 0.
+Console yêu cầu danh sách ngăn cách bằng dấu phẩy, không phải một chuỗi shell. Chạy task rồi theo dõi log group **/ecs/vsp-api-service** trên CloudWatch cho tới khi nó kết thúc với exit code 0.
 
 #### Tạo ba service
 
-Giờ tạo các ECS service, **theo đúng thứ tự này**. Với từng service: **Clusters** → `vsp-ecs-cluster` → **Services** → **Create**.
+Giờ tạo các ECS service, **theo đúng thứ tự này**. Với từng service: **Clusters** → **vsp-ecs-cluster** → **Services** → **Create**.
 
 **1. Qdrant**
 
 | Mục | Giá trị |
 |---|---|
-| Task definition | `vsp-qdrant` |
-| Service name | `qdrant` |
+| Task definition | **vsp-qdrant** |
+| Service name | **qdrant** |
 | Desired tasks | 1 |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-qdrant-sg` |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-qdrant-sg** |
 | Public IP | Disabled |
-| Service discovery | Bật, namespace `vsp.internal`, service name `qdrant` |
+| Service discovery | Bật, namespace **vsp.internal**, service name **qdrant** |
 | Load balancing | Không |
 
-Chờ task chuyển sang `RUNNING` rồi mới làm tiếp.
+Chờ task chuyển sang **RUNNING** rồi mới làm tiếp.
 
 ![qdrant](/images/5-Workshop/5.5-ECS-deployment/qdrant-service.png)
 
@@ -712,13 +712,13 @@ Chờ task chuyển sang `RUNNING` rồi mới làm tiếp.
 
 | Mục | Giá trị |
 |---|---|
-| Task definition | `vsp-search-service` |
-| Service name | `search-service` |
+| Task definition | **vsp-search-service** |
+| Service name | **search-service** |
 | Desired tasks | 1 |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-ecs-tasks-sg`, `vsp-grpc-search-sg` |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-ecs-tasks-sg**, **vsp-grpc-search-sg** |
 | Public IP | Disabled |
-| Service discovery | Bật, service name `search-service` |
+| Service discovery | Bật, service name **search-service** |
 | Load balancing | Chưa gắn — sẽ thêm ở 5.6 |
 | Deployment failure detection | Bật rollback khi thất bại |
 
@@ -728,19 +728,19 @@ Chờ task chuyển sang `RUNNING` rồi mới làm tiếp.
 
 | Mục | Giá trị |
 |---|---|
-| Task definition | `vsp-api-service` |
-| Service name | `api-service` |
+| Task definition | **vsp-api-service** |
+| Service name | **api-service** |
 | Desired tasks | 1 |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-ecs-tasks-sg`, `vsp-grpc-api-sg` |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-ecs-tasks-sg**, **vsp-grpc-api-sg** |
 | Public IP | Disabled |
-| Service discovery | Bật, service name `api-service` |
+| Service discovery | Bật, service name **api-service** |
 | Load balancing | Chưa gắn — sẽ thêm ở 5.6 |
 | Deployment failure detection | Bật rollback khi thất bại |
 
 ![api](/images/5-Workshop/5.5-ECS-deployment/api.png)
 
-Mỗi service ứng dụng được gắn **hai** security group: `vsp-ecs-tasks-sg` dùng chung cho HTTP, cộng thêm group gRPC riêng của nó. Đây chính là lúc việc tách group ở mục 5.3.2 phát huy tác dụng.
+Mỗi service ứng dụng được gắn **hai** security group: **vsp-ecs-tasks-sg** dùng chung cho HTTP, cộng thêm group gRPC riêng của nó. Đây chính là lúc việc tách group ở mục 5.3.2 phát huy tác dụng.
 
 **Deployment failure detection** bật cơ chế circuit breaker của ECS. Nếu một lần deploy không thể đạt trạng thái ổn định, ECS sẽ dừng lại và tự động rollback về task definition trước đó, thay vì để service mắc kẹt ở trạng thái deploy dở dang.
 

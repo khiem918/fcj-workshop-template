@@ -20,16 +20,16 @@ Every resource in the rest of this workshop lives inside the network you build h
 
 | Subnet | CIDR | Availability Zone | Type | What it holds |
 |---|---|---|---|---|
-| Public A | `10.0.1.0/24` | `ap-southeast-1a` | Public | Application Load Balancer |
-| Public B | `10.0.2.0/24` | `ap-southeast-1b` | Public | Application Load Balancer |
-| Private A | `10.0.10.0/24` | `ap-southeast-1a` | Private | ECS tasks, RDS, ElastiCache, Amazon MQ, VPC Endpoints |
+| Public A | **10.0.1.0/24** | **ap-southeast-1a** | Public | Application Load Balancer |
+| Public B | **10.0.2.0/24** | **ap-southeast-1b** | Public | Application Load Balancer |
+| Private A | **10.0.10.0/24** | **ap-southeast-1a** | Private | ECS tasks, RDS, ElastiCache, Amazon MQ, VPC Endpoints |
 
-The VPC uses `10.0.0.0/16`, which leaves plenty of room to add subnets later.
+The VPC uses **10.0.0.0/16**, which leaves plenty of room to add subnets later.
 
 Two public subnets exist because an Application Load Balancer requires subnets in at least two Availability Zones — it will refuse to be created with only one. The ALB itself is the only resource that lives there.
 
 {{% notice note %}}
-Everything else is placed in a single private subnet in `ap-southeast-1a`. That is a deliberate simplification to keep the workshop affordable: a second AZ would mean a second set of VPC Endpoints and a Multi-AZ database, roughly doubling the hourly cost. It also means an AZ failure takes the platform down. A production deployment would span both AZs.
+Everything else is placed in a single private subnet in **ap-southeast-1a**. That is a deliberate simplification to keep the workshop affordable: a second AZ would mean a second set of VPC Endpoints and a Multi-AZ database, roughly doubling the hourly cost. It also means an AZ failure takes the platform down. A production deployment would span both AZs.
 {{% /notice %}}
 
 ![network diagram](/images/5-Workshop/5.3-Network/network-diagram.png)

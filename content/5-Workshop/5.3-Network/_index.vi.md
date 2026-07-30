@@ -20,16 +20,16 @@ Mọi tài nguyên trong các phần còn lại của workshop đều nằm bên
 
 | Subnet | CIDR | Availability Zone | Loại | Chứa gì |
 |---|---|---|---|---|
-| Public A | `10.0.1.0/24` | `ap-southeast-1a` | Public | Application Load Balancer |
-| Public B | `10.0.2.0/24` | `ap-southeast-1b` | Public | Application Load Balancer |
-| Private A | `10.0.10.0/24` | `ap-southeast-1a` | Private | ECS task, RDS, ElastiCache, Amazon MQ, VPC Endpoint |
+| Public A | **10.0.1.0/24** | **ap-southeast-1a** | Public | Application Load Balancer |
+| Public B | **10.0.2.0/24** | **ap-southeast-1b** | Public | Application Load Balancer |
+| Private A | **10.0.10.0/24** | **ap-southeast-1a** | Private | ECS task, RDS, ElastiCache, Amazon MQ, VPC Endpoint |
 
-VPC dùng dải `10.0.0.0/16`, còn dư rất nhiều chỗ để bổ sung subnet về sau.
+VPC dùng dải **10.0.0.0/16**, còn dư rất nhiều chỗ để bổ sung subnet về sau.
 
 Sở dĩ có hai public subnet là vì Application Load Balancer bắt buộc phải có subnet ở ít nhất hai Availability Zone — nếu chỉ chọn một AZ thì AWS sẽ từ chối tạo. Bản thân ALB là tài nguyên duy nhất nằm ở đó.
 
 {{% notice note %}}
-Toàn bộ phần còn lại được đặt trong một private subnet duy nhất ở `ap-southeast-1a`. Đây là lựa chọn đơn giản hóa có chủ đích nhằm giữ chi phí workshop ở mức chấp nhận được: thêm một AZ nữa đồng nghĩa với một bộ VPC Endpoint thứ hai và database Multi-AZ, làm chi phí theo giờ tăng gần gấp đôi. Đổi lại, nếu AZ đó gặp sự cố thì toàn hệ thống ngừng hoạt động. Một hệ thống production thật sự nên trải trên cả hai AZ.
+Toàn bộ phần còn lại được đặt trong một private subnet duy nhất ở **ap-southeast-1a**. Đây là lựa chọn đơn giản hóa có chủ đích nhằm giữ chi phí workshop ở mức chấp nhận được: thêm một AZ nữa đồng nghĩa với một bộ VPC Endpoint thứ hai và database Multi-AZ, làm chi phí theo giờ tăng gần gấp đôi. Đổi lại, nếu AZ đó gặp sự cố thì toàn hệ thống ngừng hoạt động. Một hệ thống production thật sự nên trải trên cả hai AZ.
 {{% /notice %}}
 
 ![sơ đồ mạng](/images/5-Workshop/5.3-Network/network-diagram.png)

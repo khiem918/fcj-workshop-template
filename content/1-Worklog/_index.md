@@ -6,32 +6,23 @@ chapter: false
 pre: " <b> 1. </b> "
 ---
 
-**⚠️ Note: The information below is for reference purposes only. Please do not copy verbatim for your report, including this warning.**
+The internship ran for **6 weeks**, from **22 June 2026** to **31 July 2026**, around a single product: **VideoPlatformServer** — a video sharing platform with semantic search, built and then deployed on AWS.
 
-**On this page**, you will need to introduce your worklog. **How** did you complete it? How many weeks did you take to complete the program? **What** did you do in those weeks?
+The six weeks split into two halves of equal length:
 
-Typically, and as a standard, a worklog is carried out over about 3 months (throughout the internship period) with weekly contents as follows:
+* **Weeks 1 – 3: building the product.** Developing two services from scratch — **api_service** on NestJS 11 with GraphQL, and **search_service** on Python FastAPI — along with the full business flow: authentication, upload, asynchronous transcoding to MPEG-DASH, and hybrid search combining keywords with vectors.
+* **Weeks 4 – 6: infrastructure and deployment.** Designing the private network on AWS, building the managed data tier, deploying all three services onto ECS Fargate, opening the path to the Internet through ALB and CloudFront, and finally automating deployment with GitHub Actions over OIDC.
 
-**Week 1:** [Getting familiar with AWS and basic AWS services](1.1-week1/)
+The split was deliberate: the first three weeks produce a system that works locally, so the last three can focus entirely on the infrastructure problem instead of debugging code and configuration at the same time.
 
-**Week 2:** [Doing task A...](1.2-week2/)
+**Week 1:** [Data modelling and scaffolding api_service](1.1-week1/)
 
-**Week 3:** [Doing task B...](1.3-week3/)
+**Week 2:** [S3 uploads and asynchronous MPEG-DASH transcoding](1.2-week2/)
 
-**Week 4:** [Doing task C...](1.4-week4/)
+**Week 3:** [search_service, semantic search, and inter-service communication](1.3-week3/)
 
-**Week 5:** [Doing task D...](1.5-week5/)
+**Week 4:** [AWS foundation: IAM, VPC, security groups, and VPC endpoints](1.4-week4/)
 
-**Week 6:** [Doing task E...](1.6-week6/)
+**Week 5:** [The managed data tier and deployment to ECS Fargate](1.5-week5/)
 
-**Week 7:** [Doing task G...](1.7-week7/)
-
-**Week 8:** [Doing task H...](1.8-week8/)
-
-**Week 9:** [Doing task I...](1.9-week9/)
-
-**Week 10:** [Doing task L...](1.10-week10/)
-
-**Week 11:** [Doing task M...](1.11-week11/)
-
-**Week 12:** [Doing task N...](1.12-week12/)
+**Week 6:** [ALB, CloudFront, and automated CI/CD with GitHub Actions](1.6-week6/)

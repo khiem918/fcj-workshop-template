@@ -22,21 +22,21 @@ In GitHub: **Actions** → **Deploy to ECS** → **⋯** → **Disable workflow*
 
 CloudFront is slow, so start it early and let it run while you delete other things.
 
-**CloudFront** → your distribution → **Disable**, wait for the state to become `Deployed` (up to 15 minutes), then **Delete**.
+**CloudFront** → your distribution → **Disable**, wait for the state to become **Deployed** (up to 15 minutes), then **Delete**.
 
 A distribution cannot be deleted while enabled. There is no way to skip the disable step or speed it up.
 
 #### 3. Delete the Route 53 record
 
-**Route 53** → your hosted zone → select the `app` A record → **Delete record**.
+**Route 53** → your hosted zone → select the **app** A record → **Delete record**.
 
-Keep the hosted zone itself if you intend to reuse the domain — it costs 0.50 USD per month. Delete it only if you are done with the domain entirely, and note that you cannot delete a zone that still contains records other than the default `NS` and `SOA`.
+Keep the hosted zone itself if you intend to reuse the domain — it costs 0.50 USD per month. Delete it only if you are done with the domain entirely, and note that you cannot delete a zone that still contains records other than the default **NS** and **SOA**.
 
 #### 4. Delete the load balancer and target groups
 
-**EC2** → **Load balancers** → `vsp-alb` → **Delete**.
+**EC2** → **Load balancers** → **vsp-alb** → **Delete**.
 
-Then **Target groups** → delete `vsp-api-tg` and `vsp-search-tg`.
+Then **Target groups** → delete **vsp-api-tg** and **vsp-search-tg**.
 
 The target groups must go after the ALB; a target group attached to a listener cannot be deleted.
 
@@ -56,7 +56,7 @@ done
 aws ecs delete-cluster --cluster vsp-ecs-cluster
 ```
 
-`--force` deletes a service without scaling it down first, but scaling to zero beforehand makes the deletion faster and cleaner.
+**--force** deletes a service without scaling it down first, but scaling to zero beforehand makes the deletion faster and cleaner.
 
 Task definitions do not cost anything and can be left. To remove them anyway, deregister each revision:
 
@@ -67,7 +67,7 @@ aws ecs deregister-task-definition --task-definition vsp-api-service:1
 
 #### 6. Delete the Cloud Map namespace
 
-**AWS Cloud Map** → `vsp.internal` → delete the three registered services first (`api-service`, `search-service`, `qdrant`), then the namespace.
+**AWS Cloud Map** → **vsp.internal** → delete the three registered services first (**api-service**, **search-service**, **qdrant**), then the namespace.
 
 A namespace with registered services cannot be deleted. If the services will not delete, an ECS service is probably still holding a registration — confirm step 5 finished.
 
@@ -75,13 +75,13 @@ A namespace with registered services cannot be deleted. If the services will not
 
 This is where the real money is.
 
-**Amazon MQ** → `vsp-mq` → **Delete**. Deleting the broker takes several minutes.
+**Amazon MQ** → **vsp-mq** → **Delete**. Deleting the broker takes several minutes.
 
-**RDS** → `vsp-rds-postgresql` → **Delete**. Uncheck **Create final snapshot** unless you want to keep the data — snapshots are billed for storage. You must type `delete me` to confirm.
+**RDS** → **vsp-rds-postgresql** → **Delete**. Uncheck **Create final snapshot** unless you want to keep the data — snapshots are billed for storage. You must type **delete me** to confirm.
 
-**ElastiCache** → delete `vsp-api-redis` and `vsp-search-redis`, choosing no final backup.
+**ElastiCache** → delete **vsp-api-redis** and **vsp-search-redis**, choosing no final backup.
 
-**EFS** → `vsp-qdrant-efs` → delete the mount target first, then the file system.
+**EFS** → **vsp-qdrant-efs** → delete the mount target first, then the file system.
 
 **S3** → the bucket must be emptied before it can be deleted:
 
@@ -113,7 +113,7 @@ aws ecr delete-repository --repository-name video-platform/api-service --force
 aws ecr delete-repository --repository-name video-platform/search-service --force
 ```
 
-`--force` is required because the repositories still contain images.
+**--force** is required because the repositories still contain images.
 
 #### 10. Delete the network
 
@@ -121,23 +121,23 @@ Now the VPC can go. Deleting the VPC from the console removes subnets, route tab
 
 Delete the security groups first, in this order:
 
-1. `vsp-vpce-sg`, `vsp-efs-sg`
-2. `vsp-rds-sg`, `vsp-redis-api-sg`, `vsp-redis-search-sg`, `vsp-rabbitmq-sg`, `vsp-qdrant-sg`
-3. `vsp-grpc-api-sg` and `vsp-grpc-search-sg` — **remove the inbound rules from both before deleting either**, because each references the other
-4. `vsp-ecs-tasks-sg`
-5. `vsp-alb-sg`
+1. **vsp-vpce-sg**, **vsp-efs-sg**
+2. **vsp-rds-sg**, **vsp-redis-api-sg**, **vsp-redis-search-sg**, **vsp-rabbitmq-sg**, **vsp-qdrant-sg**
+3. **vsp-grpc-api-sg** and **vsp-grpc-search-sg** — **remove the inbound rules from both before deleting either**, because each references the other
+4. **vsp-ecs-tasks-sg**
+5. **vsp-alb-sg**
 
 Then **VPC** → your VPC → **Delete VPC**.
 
 {{% notice note %}}
-`DependencyViolation` on a security group almost always means a network interface still exists. Deleted ECS tasks and RDS instances leave their ENIs behind for a few minutes. Wait, then retry — or find the holder with `aws ec2 describe-network-interfaces --filters "Name=group-id,Values=<sg-id>"`.
+**DependencyViolation** on a security group almost always means a network interface still exists. Deleted ECS tasks and RDS instances leave their ENIs behind for a few minutes. Wait, then retry — or find the holder with **aws ec2 describe-network-interfaces --filters "Name=group-id,Values=<sg-id>"**.
 {{% /notice %}}
 
 #### 11. Delete the certificates, parameters, and roles
 
-**ACM** → delete both certificates, in `us-east-1` and `ap-southeast-1`. A certificate in use by a distribution cannot be deleted, so this has to come after step 2.
+**ACM** → delete both certificates, in **us-east-1** and **ap-southeast-1**. A certificate in use by a distribution cannot be deleted, so this has to come after step 2.
 
-**Systems Manager** → Parameter Store → delete everything under `/vsp/`:
+**Systems Manager** → Parameter Store → delete everything under **/vsp/**:
 
 ```
 aws ssm get-parameters-by-path --path /vsp --recursive \
@@ -145,9 +145,9 @@ aws ssm get-parameters-by-path --path /vsp --recursive \
   | xargs -n 10 aws ssm delete-parameters --names
 ```
 
-**CloudWatch** → delete the three `/ecs/vsp-*` log groups.
+**CloudWatch** → delete the three **/ecs/vsp-\*** log groups.
 
-**IAM** → delete `ecsTaskExecutionRole`, `vspTaskRole`, and `GitHubActionsDeployRole`, plus the OIDC provider if you have no other repository using it.
+**IAM** → delete **ecsTaskExecutionRole**, **vspTaskRole**, and **GitHubActionsDeployRole**, plus the OIDC provider if you have no other repository using it.
 
 #### Verify nothing is left
 

@@ -10,9 +10,9 @@ Before building anything, prepare the AWS account, the local tools, and the sour
 
 #### Region
 
-This workshop uses the **Asia Pacific (Singapore) — `ap-southeast-1`** region throughout. Create every resource in this region: ECS tasks, RDS, ElastiCache, and Amazon MQ must all sit in the same VPC, and a mismatched region is the most common cause of resources that cannot see each other.
+This workshop uses the **Asia Pacific (Singapore) — ap-southeast-1** region throughout. Create every resource in this region: ECS tasks, RDS, ElastiCache, and Amazon MQ must all sit in the same VPC, and a mismatched region is the most common cause of resources that cannot see each other.
 
-**AWS Certificate Manager is the one exception. A certificate used by CloudFront must be requested in US East (N. Virginia) — `us-east-1`, regardless of where the rest of your stack lives. Section 5.6 covers this in detail.**
+**AWS Certificate Manager is the one exception. A certificate used by CloudFront must be requested in US East (N. Virginia) — us-east-1, regardless of where the rest of your stack lives. Section 5.6 covers this in detail.**
 
 #### IAM permissions
 
@@ -135,7 +135,7 @@ and:
 
 CloudFront sits in front of the platform with a custom domain and a TLS certificate. You need a domain you control — either registered through **Route 53** or registered elsewhere with its nameservers pointed at a Route 53 hosted zone.
 
-This is the only prerequisite that costs money up front (roughly 10–15 USD per year for a common TLD). If you would rather skip it, you can still complete every section using the default CloudFront domain (`dxxxxxxxxxx.cloudfront.net`), but the TLS and DNS steps in the following sections will not apply.
+This is the only prerequisite that costs money up front (roughly 10–15 USD per year for a common TLD). If you would rather skip it, you can still complete every section using the default CloudFront domain (**dxxxxxxxxxx.cloudfront.net**), but the TLS and DNS steps in the following sections will not apply.
 
 #### A GitHub repository
 

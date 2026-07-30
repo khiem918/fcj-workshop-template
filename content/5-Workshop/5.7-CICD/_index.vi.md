@@ -6,7 +6,7 @@ chapter : false
 pre : " <b> 5.7. </b> "
 ---
 
-Mọi thứ từ đầu tới giờ đều làm bằng tay. Mục này thay thế bằng một pipeline: push lên `main`, và GitHub Actions sẽ build cả hai image, chạy migration database, rồi cuộn các ECS service sang phiên bản mới — mà không lưu bất kỳ AWS access key nào ở đâu cả.
+Mọi thứ từ đầu tới giờ đều làm bằng tay. Mục này thay thế bằng một pipeline: push lên **main**, và GitHub Actions sẽ build cả hai image, chạy migration database, rồi cuộn các ECS service sang phiên bản mới — mà không lưu bất kỳ AWS access key nào ở đâu cả.
 
 #### Vì sao dùng OIDC thay vì access key
 
@@ -21,8 +21,8 @@ Cách hiển nhiên để GitHub Actions deploy được là tạo một IAM use
 | Mục | Giá trị |
 |---|---|
 | Provider type | OpenID Connect |
-| Provider URL | `https://token.actions.githubusercontent.com` |
-| Audience | `sts.amazonaws.com` |
+| Provider URL | **https://token.actions.githubusercontent.com** |
+| Audience | **sts.amazonaws.com** |
 
 ![oidc provider](/images/5-Workshop/5.7-CICD/provider.png)
 
@@ -55,20 +55,20 @@ Identity provider mới chỉ nói với AWS rằng nó tin chữ ký của GitH
 }
 ```
 
-Ở trang permissions, đính kèm **chính sách quyền deploy bạn đã tạo ở mục 5.2** — chính sách có các `Sid` là `ECRAuthToken`, `ECRRepositoryOperations`, `ECSServiceManagement` và `RestrictedPassRoleToECSOnly`. Chính sách đó đã được giới hạn đúng bằng những gì pipeline cần làm: đẩy image lên ECR, đăng ký và cập nhật task definition, chạy task migration, và truyền `ecsTaskExecutionRole` cho ECS chứ không truyền gì khác.
+Ở trang permissions, đính kèm **chính sách quyền deploy bạn đã tạo ở mục 5.2** — chính sách có các **Sid** là **ECRAuthToken**, **ECRRepositoryOperations**, **ECSServiceManagement** và **RestrictedPassRoleToECSOnly**. Chính sách đó đã được giới hạn đúng bằng những gì pipeline cần làm: đẩy image lên ECR, đăng ký và cập nhật task definition, chạy task migration, và truyền **ecsTaskExecutionRole** cho ECS chứ không truyền gì khác.
 
-Đặt tên role là **`GitHubActionsDeployRole`** — tên này phải khớp với biến `AWS_ROLE_ARN` ở bước kế tiếp.
+Đặt tên role là **GitHubActionsDeployRole** — tên này phải khớp với biến **AWS_ROLE_ARN** ở bước kế tiếp.
 
-**Điều kiện `sub` chính là toàn bộ ranh giới bảo mật của thiết lập này. Bỏ nó đi, hoặc thay bằng `"token.actions.githubusercontent.com:sub": "*"`, thì bất kỳ workflow GitHub Actions nào trong bất kỳ repository nào trên GitHub cũng có thể nhận vai này và deploy vào tài khoản của bạn. Riêng điều kiện `aud` không giới hạn được gì cả — mọi token OIDC của GitHub đều mang audience là `sts.amazonaws.com`.**
+**Điều kiện sub chính là toàn bộ ranh giới bảo mật của thiết lập này. Bỏ nó đi, hoặc thay bằng "token.actions.githubusercontent.com:sub": "\*", thì bất kỳ workflow GitHub Actions nào trong bất kỳ repository nào trên GitHub cũng có thể nhận vai này và deploy vào tài khoản của bạn. Riêng điều kiện aud không giới hạn được gì cả — mọi token OIDC của GitHub đều mang audience là sts.amazonaws.com.**
 
-Giá trị `sub` ở trên giới hạn việc nhận vai vào đúng nhánh `main` của một repository. Hai biến thể thường gặp:
+Giá trị **sub** ở trên giới hạn việc nhận vai vào đúng nhánh **main** của một repository. Hai biến thể thường gặp:
 
-| Mục tiêu | Giá trị `sub` | Toán tử điều kiện |
+| Mục tiêu | Giá trị **sub** | Toán tử điều kiện |
 |---|---|---|
-| Chỉ nhánh `main` (khuyến nghị) | `repo:{github-owner}/{repo_name}:ref:refs/heads/main` | `StringEquals` |
-| Mọi nhánh hoặc tag trong repo đó | `repo:{github-owner}/{repo_name}:*` | `StringLike` |
+| Chỉ nhánh **main** (khuyến nghị) | **repo:{github-owner}/{repo_name}:ref:refs/heads/main** | **StringEquals** |
+| Mọi nhánh hoặc tag trong repo đó | **repo:{github-owner}/{repo_name}:\*** | **StringLike** |
 
-Chỉ dùng `StringLike` khi giá trị có chứa ký tự đại diện. Ký tự đại diện nằm trong `StringEquals` sẽ bị so khớp theo nghĩa đen, tạo ra một role âm thầm không bao giờ nhận vai được — lỗi hiện ra trông như lỗi phân quyền chứ không giống lỗi gõ nhầm.
+Chỉ dùng **StringLike** khi giá trị có chứa ký tự đại diện. Ký tự đại diện nằm trong **StringEquals** sẽ bị so khớp theo nghĩa đen, tạo ra một role âm thầm không bao giờ nhận vai được — lỗi hiện ra trông như lỗi phân quyền chứ không giống lỗi gõ nhầm.
 
 #### Thêm repository variable
 
@@ -76,23 +76,23 @@ Trên GitHub: **Settings** → **Secrets and variables** → **Actions** → **V
 
 | Name | Value |
 |---|---|
-| `AWS_ROLE_ARN` | `arn:aws:iam::<account-id>:role/GitHubActionsDeployRole` |
-| `AWS_REGION` | `ap-southeast-1` |
-| `ECS_CLUSTER` | `vsp-ecs-cluster` |
+| **AWS_ROLE_ARN** | **arn:aws:iam::<account-id>:role/GitHubActionsDeployRole** |
+| **AWS_REGION** | **ap-southeast-1** |
+| **ECS_CLUSTER** | **vsp-ecs-cluster** |
 
 Đây là **variable**, không phải secret — không giá trị nào trong số đó là bí mật, và variable hiện ra trong log giúp việc gỡ lỗi dễ hơn nhiều. Không có secret nào cần thêm cả: đó chính là điểm mấu chốt của OIDC.
 
 #### Workflow này làm gì, và vì sao theo thứ tự đó
 
-**Gắn tag theo commit SHA.** `${GITHUB_SHA::7}` cho mỗi bản build một tag duy nhất, truy vết được. Bạn nhìn vào một task đang chạy là biết chính xác nó sinh ra từ commit nào, và rollback nghĩa là deploy lại một tag đã biết thay vì build lại từ đầu.
+**Gắn tag theo commit SHA.** **${GITHUB_SHA::7}** cho mỗi bản build một tag duy nhất, truy vết được. Bạn nhìn vào một task đang chạy là biết chính xác nó sinh ra từ commit nào, và rollback nghĩa là deploy lại một tag đã biết thay vì build lại từ đầu.
 
-**Migrate trước, deploy sau.** Job migration chặn các job deploy thông qua `needs`. Nếu migration thất bại, không có mã mới nào lên tới cluster — phiên bản cũ vẫn chạy với schema cũ, tức là một hệ thống đang hoạt động. Nếu deploy trước rồi mới migrate, ta sẽ có mã mới chạy trên schema mà nó không hiểu.
+**Migrate trước, deploy sau.** Job migration chặn các job deploy thông qua **needs**. Nếu migration thất bại, không có mã mới nào lên tới cluster — phiên bản cũ vẫn chạy với schema cũ, tức là một hệ thống đang hoạt động. Nếu deploy trước rồi mới migrate, ta sẽ có mã mới chạy trên schema mà nó không hiểu.
 
-**Thất bại khi exit code khác 0.** `aws ecs run-task` trả về thành công ngay khi task được *lên lịch*, chứ không phải khi nó chạy xong đúng. Nếu không có bước `describe-tasks` kiểm tra `exitCode` một cách tường minh, một migration thất bại vẫn sẽ được báo là bước màu xanh.
+**Thất bại khi exit code khác 0.** **aws ecs run-task** trả về thành công ngay khi task được *lên lịch*, chứ không phải khi nó chạy xong đúng. Nếu không có bước **describe-tasks** kiểm tra **exitCode** một cách tường minh, một migration thất bại vẫn sẽ được báo là bước màu xanh.
 
 **Render thay vì viết lại task definition.** Action render tải task definition đang chạy về và chỉ thay đúng trường image, nhờ vậy secret, port mapping và giới hạn tài nguyên được giữ nguyên chính xác. Tự viết tay JSON trong pipeline sẽ khiến nó lệch khỏi thực tế ngay khi có người đổi thứ gì đó trong console.
 
-**Chờ tới khi ổn định.** `wait-for-service-stability: true` kết hợp với circuit breaker đã bật ở mục 5.5 nghĩa là một image hỏng sẽ vừa làm workflow thất bại, vừa khiến service tự động rollback.
+**Chờ tới khi ổn định.** **wait-for-service-stability: true** kết hợp với circuit breaker đã bật ở mục 5.5 nghĩa là một image hỏng sẽ vừa làm workflow thất bại, vừa khiến service tự động rollback.
 
 ![lần chạy workflow](/images/5-Workshop/5.7-CICD/run.png)
 

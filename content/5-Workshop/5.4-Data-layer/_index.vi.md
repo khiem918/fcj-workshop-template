@@ -22,10 +22,10 @@ Tạo subnet group trước: console **RDS** → **Subnet groups** → **Create 
 
 | Mục | Giá trị |
 |---|---|
-| Name | `vsp-db-subnet-group` |
+| Name | **vsp-db-subnet-group** |
 | VPC | VPC đã tạo ở 5.3.1 |
-| Availability Zones | `ap-southeast-1a`, `ap-southeast-1b` |
-| Subnets | `10.0.10.0/24`, `10.0.11.0/24` |
+| Availability Zones | **ap-southeast-1a**, **ap-southeast-1b** |
+| Subnets | **10.0.10.0/24**, **10.0.11.0/24** |
 
 Tiếp theo vào **Databases** → **Create database**:
 
@@ -34,16 +34,16 @@ Tiếp theo vào **Databases** → **Create database**:
 | Creation method | Standard create |
 | Engine | PostgreSQL 16 |
 | Template | Free tier (hoặc Dev/Test) |
-| DB instance identifier | `vsp-rds-postgresql` |
-| Master username | `postgres` |
+| DB instance identifier | **vsp-rds-postgresql** |
+| Master username | **postgres** |
 | Credentials management | Self managed — đặt mật khẩu mạnh |
-| Instance class | `db.t3.micro` |
+| Instance class | **db.t3.micro** |
 | Storage | 20 GiB gp3, tắt autoscaling |
 | Multi-AZ | Do not create a standby |
 | VPC | VPC đã tạo ở 5.3.1 |
 | Public access | **No** |
-| VPC security group | `vsp-rds-sg` |
-| Availability Zone | `ap-southeast-1a` |
+| VPC security group | **vsp-rds-sg** |
+| Availability Zone | **ap-southeast-1a** |
 | Backup retention | 7 ngày |
 | Encryption | Enabled |
 
@@ -61,49 +61,49 @@ vsp-rds-postgresql.xxxxxxxxxxxx.ap-southeast-1.rds.amazonaws.com:5432
 
 #### Amazon ElastiCache for Valkey
 
-Hai cụm riêng biệt, mỗi service một cụm. Về lý thì dùng chung một cụm cũng được, nhưng hai loại tải này hành xử rất khác nhau: `api_service` dùng Redis làm broker cho BullMQ, nơi một lần flush sẽ làm mất toàn bộ job transcode đang chờ; còn `search_service` chỉ dùng nó làm cache kết quả có thể vứt đi bất cứ lúc nào. Tách riêng nghĩa là service này không thể đẩy dữ liệu của service kia ra khỏi bộ nhớ, và mỗi bên có thể đổi kích thước độc lập.
+Hai cụm riêng biệt, mỗi service một cụm. Về lý thì dùng chung một cụm cũng được, nhưng hai loại tải này hành xử rất khác nhau: **api_service** dùng Redis làm broker cho BullMQ, nơi một lần flush sẽ làm mất toàn bộ job transcode đang chờ; còn **search_service** chỉ dùng nó làm cache kết quả có thể vứt đi bất cứ lúc nào. Tách riêng nghĩa là service này không thể đẩy dữ liệu của service kia ra khỏi bộ nhớ, và mỗi bên có thể đổi kích thước độc lập.
 
 Sau đó tạo hai cụm với engine là **Valkey**:
 
-| Mục | Cụm cho `api-service` | Cụm cho `search-service` |
+| Mục | Cụm cho **api-service** | Cụm cho **search-service** |
 |---|---|---|
-| Name | `vsp-api-redis` | `vsp-search-redis` |
+| Name | **vsp-api-redis** | **vsp-search-redis** |
 | Deployment | Design your own cache — Cluster mode disabled | như trên |
-| Node type | `cache.t4g.micro` | `cache.t4g.micro` |
+| Node type | **cache.t4g.micro** | **cache.t4g.micro** |
 | Replicas | 0 | 0 |
-| Security group | `vsp-redis-api-sg` | `vsp-redis-search-sg` |
+| Security group | **vsp-redis-api-sg** | **vsp-redis-search-sg** |
 | Encryption in transit | Enabled | Enabled |
 | Encryption at rest | Enabled | Enabled |
 
 ![tạo elasticache](/images/5-Workshop/5.4-Data-layer/create-valkey.png)
 
-**Nếu bật encryption in transit, ứng dụng bắt buộc phải kết nối bằng TLS. Trên thực tế nghĩa là chuỗi kết nối phải dùng `rediss://` thay vì `redis://`, và với `ioredis` hay BullMQ thì client cần thêm `tls: {}` trong phần tùy chọn. Một client cấu hình dạng plaintext sẽ treo ở bước kết nối chứ không trả về lỗi rõ ràng — quá trình bắt tay đơn giản là không bao giờ hoàn tất.**
+**Nếu bật encryption in transit, ứng dụng bắt buộc phải kết nối bằng TLS. Trên thực tế nghĩa là chuỗi kết nối phải dùng rediss:// thay vì redis://, và với ioredis hay BullMQ thì client cần thêm tls: {} trong phần tùy chọn. Một client cấu hình dạng plaintext sẽ treo ở bước kết nối chứ không trả về lỗi rõ ràng — quá trình bắt tay đơn giản là không bao giờ hoàn tất.**
 
-Copy **Primary endpoint** của từng cụm khi chúng chuyển sang `available`.
+Copy **Primary endpoint** của từng cụm khi chúng chuyển sang **available**.
 
 #### Amazon MQ for RabbitMQ
 
-RabbitMQ đảm nhận việc đồng bộ metadata giữa hai service: khi một video transcode xong, `api_service` publish vào `video.metadata.trans`, `search_service` tiêu thụ thông điệp đó, sinh embedding, rồi trả lời qua `video.metadata.res`.
+RabbitMQ đảm nhận việc đồng bộ metadata giữa hai service: khi một video transcode xong, **api_service** publish vào **video.metadata.trans**, **search_service** tiêu thụ thông điệp đó, sinh embedding, rồi trả lời qua **video.metadata.res**.
 
 Console **Amazon MQ** → **Create brokers** → **RabbitMQ**:
 
 | Mục | Giá trị |
 |---|---|
 | Deployment mode | **Single-instance broker** |
-| Broker name | `vsp-mq` |
-| Instance type | `mq.m7g.medium` |
-| Username | `vspadmin` |
+| Broker name | **vsp-mq** |
+| Instance type | **mq.m7g.medium** |
+| Username | **vspadmin** |
 | Password | từ 12 ký tự trở lên, không dùng dấu phẩy, hai chấm hay dấu bằng |
 | Access type | **Private access** |
 | VPC | VPC đã tạo ở 5.3.1 |
 | Subnet | private subnet |
-| Security group | `vsp-rabbitmq-sg` |
+| Security group | **vsp-rabbitmq-sg** |
 
 ![tạo amazon mq](/images/5-Workshop/5.4-Data-layer/create-mq.png)
 
-**Private access** đặt broker vào bên trong VPC mà không có endpoint công khai nào. Kết hợp với VPC endpoint `mq` đã tạo ở 5.3.3, các ECS task truy cập nó hoàn toàn qua địa chỉ riêng.
+**Private access** đặt broker vào bên trong VPC mà không có endpoint công khai nào. Kết hợp với VPC endpoint **mq** đã tạo ở 5.3.3, các ECS task truy cập nó hoàn toàn qua địa chỉ riêng.
 
-Mật khẩu có những ràng buộc ký tự mà console chỉ báo sau khi bạn bấm gửi và bị từ chối — hãy tránh `,` `:` `=` và khoảng trắng.
+Mật khẩu có những ràng buộc ký tự mà console chỉ báo sau khi bạn bấm gửi và bị từ chối — hãy tránh **,** **:** **=** và khoảng trắng.
 
 Broker mất khoảng 15 phút để tạo. Khi sẵn sàng, copy endpoint AMQP:
 
@@ -112,7 +112,7 @@ amqps://b-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.mq.ap-southeast-1.amazonaws.com:5
 ```
 
 {{% notice note %}}
-Amazon MQ là thành phần đắt nhất trong workshop này mà không có free tier — khoảng 40 - 50 USD mỗi tháng cho `mq.m7g.medium` chạy liên tục. Nó tính tiền bất kể có thông điệp nào đi qua hay không. Mục 5.8 hướng dẫn cách xóa nó.
+Amazon MQ là thành phần đắt nhất trong workshop này mà không có free tier — khoảng 40 - 50 USD mỗi tháng cho **mq.m7g.medium** chạy liên tục. Nó tính tiền bất kể có thông điệp nào đi qua hay không. Mục 5.8 hướng dẫn cách xóa nó.
 {{% /notice %}}
 
 #### Amazon S3
@@ -121,8 +121,8 @@ Một bucket duy nhất chứa cả file upload gốc lẫn output sau transcode
 
 | Mục | Giá trị |
 |---|---|
-| Bucket name | `video-platform-<your-account-id>-ap-southeast-1` |
-| Region | `ap-southeast-1` |
+| Bucket name | **video-platform-<your-account-id>-ap-southeast-1** |
+| Region | **ap-southeast-1** |
 | Block all public access | **Enabled** |
 | Bucket versioning | Disabled |
 | Encryption | SSE-S3 |
@@ -166,18 +166,18 @@ Console **EFS** → **Create file system** → **Customize**:
 
 | Mục | Giá trị |
 |---|---|
-| Name | `vsp-qdrant-efs` |
+| Name | **vsp-qdrant-efs** |
 | VPC | VPC đã tạo ở 5.3.1 |
 | Storage class | Regional |
 | Automatic backups | Enabled |
 | Lifecycle management | Chuyển sang IA sau 30 ngày |
 | Encryption | Enabled |
 
-Ở bước cấu hình mạng, xóa các mount target mặc định và **chỉ giữ lại** cái ở `ap-southeast-1a` trên subnet `10.0.10.0/24`. Tạo cho nó một security group tên `vsp-efs-sg`:
+Ở bước cấu hình mạng, xóa các mount target mặc định và **chỉ giữ lại** cái ở **ap-southeast-1a** trên subnet **10.0.10.0/24**. Tạo cho nó một security group tên **vsp-efs-sg**:
 
 | Security group | Port | Source |
 |---|---|---|
-| `vsp-efs-sg` | 2049 | `vsp-qdrant-sg` |
+| **vsp-efs-sg** | 2049 | **vsp-qdrant-sg** |
 
 Port 2049 là NFS. Chỉ task Qdrant cần tới nó.
 
@@ -193,8 +193,8 @@ Vào **Systems Manager** → **Parameter Store** → **Create parameter**, làm 
 
 ![tạo parameter store](/images/5-Workshop/5.4-Data-layer/para-store.png)
 
-Dùng **SecureString** cho mọi thứ chứa mật khẩu hoặc khóa. Tham số SecureString được mã hóa bằng khóa KMS, và đó chính là lý do task execution role của ECS cần quyền `kms:Decrypt`, cũng như lý do VPC endpoint `kms` tồn tại.
+Dùng **SecureString** cho mọi thứ chứa mật khẩu hoặc khóa. Tham số SecureString được mã hóa bằng khóa KMS, và đó chính là lý do task execution role của ECS cần quyền **kms:Decrypt**, cũng như lý do VPC endpoint **kms** tồn tại.
 
-Các hostname `.vsp.internal` hiện chưa phân giải được — Cloud Map namespace sẽ được tạo ở mục 5.5. Cứ điền vào bây giờ; chúng sẽ phân giải được đúng lúc container đọc tới.
+Các hostname **.vsp.internal** hiện chưa phân giải được — Cloud Map namespace sẽ được tạo ở mục 5.5. Cứ điền vào bây giờ; chúng sẽ phân giải được đúng lúc container đọc tới.
 
 

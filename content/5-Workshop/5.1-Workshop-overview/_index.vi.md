@@ -26,9 +26,9 @@ Trong workshop này chúng ta dùng VPC Endpoint và **hoàn toàn không tạo 
 
 Hệ thống gồm hai application service độc lập cùng một vector database tự host, tất cả chạy dưới dạng ECS Fargate service trong cùng một private subnet:
 
-+ **`api-service`** (NestJS + Apollo GraphQL) — xử lý xác thực, CRUD video, sinh presigned URL upload lên S3, và chạy worker transcode bất đồng bộ. Service lắng nghe cổng `8080` cho HTTP/GraphQL và `50051` cho gRPC.
-+ **`search-service`** (Python FastAPI) — xử lý tìm kiếm lai và giữ cho chỉ mục vector luôn đồng bộ. Service lắng nghe cổng `8000` cho HTTP và `50052` cho gRPC.
-+ **`qdrant`** — vector database tự host, lưu embedding của video, dữ liệu được ghi bền vững trên một file system Amazon EFS để chỉ mục không mất khi task khởi động lại.
++ **api-service** (NestJS + Apollo GraphQL) — xử lý xác thực, CRUD video, sinh presigned URL upload lên S3, và chạy worker transcode bất đồng bộ. Service lắng nghe cổng **8080** cho HTTP/GraphQL và **50051** cho gRPC.
++ **search-service** (Python FastAPI) — xử lý tìm kiếm lai và giữ cho chỉ mục vector luôn đồng bộ. Service lắng nghe cổng **8000** cho HTTP và **50052** cho gRPC.
++ **qdrant** — vector database tự host, lưu embedding của video, dữ liệu được ghi bền vững trên một file system Amazon EFS để chỉ mục không mất khi task khởi động lại.
 
 Bao quanh chúng là các dịch vụ được quản lý: **Amazon RDS for PostgreSQL** cho metadata quan hệ, **Amazon ElastiCache for Valkey** cho session, cache và hàng đợi job BullMQ, **Amazon MQ (RabbitMQ)** cho message bất đồng bộ giữa hai service, và **Amazon S3** cho file gốc lẫn file video đã transcode.
 

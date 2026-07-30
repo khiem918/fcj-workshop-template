@@ -1,57 +1,32 @@
 ---
 title: "Worklog Tuần 3"
 date: 2024-01-01
-weight: 1
+weight: 3
 chapter: false
 pre: " <b> 1.3. </b> "
 ---
-**⚠️ Lưu ý: Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng không sao chép nguyên văn cho bài báo cáo của bạn kể cả warning này.**
-
 
 ### Mục tiêu tuần 3:
 
-* Kết nối, làm quen với các thành viên trong First Cloud AI Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+* Xây dựng **search_service** bằng Python FastAPI với tìm kiếm lai: từ khoá kết hợp ngữ nghĩa.
+* Thiết lập giao tiếp hai chiều giữa hai service qua gRPC.
+* Đồng bộ metadata video bất đồng bộ qua RabbitMQ.
 
 ### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCAJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
 
+| Thứ | Công việc | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu |
+| --- | --- | --- | --- | --- |
+| 2 | - Khởi tạo **search_service** theo kiến trúc phân lớp: **app**, **core**, **domain**, **infrastructure** <br> - Dựng container dependency injection và cấu hình tập trung | 06/07/2026 | 06/07/2026 | |
+| 3 | - Tích hợp Qdrant làm vector database <br> - Sinh embedding cho tiêu đề và mô tả video <br> - **semantic_worker** xử lý việc index nền | 07/07/2026 | 08/07/2026 |  |
+| 4 | - Định nghĩa **proto/video.proto** <br>&emsp; + **VideoMetaDataService** — **api_service** phục vụ, cổng 50051 <br>&emsp; + **DeleteVideoService** — **search_service** phục vụ, cổng 50052 <br> - Sinh stub cho cả TypeScript và Python | 08/07/2026 | 09/07/2026 |  |
+| 5 | - Đồng bộ metadata qua RabbitMQ với routing key **video.metadata.trans** và **video.metadata.res** <br> - Viết **consumer** và **dlq_consumer** cho hàng đợi lỗi | 09/07/2026 | 10/07/2026 |  |
+| 6 | - Hoàn thiện endpoint **/api/v1/search** và **/api/v1/health** <br> - **Thực hành:** kiểm thử tích hợp hai service chạy song song bằng Docker Compose | 10/07/2026 | 10/07/2026 | |
 
 ### Kết quả đạt được tuần 3:
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Đã tạo và cấu hình AWS Free Tier account thành công.
-
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
-
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
-
-
+* **search_service** chạy được với kiến trúc phân lớp rõ ràng, phần logic nghiệp vụ không phụ thuộc trực tiếp vào FastAPI hay Qdrant nên thay thế hạ tầng về sau không phải sửa lõi.
+* Tìm kiếm trả về kết quả kết hợp giữa khớp từ khoá và độ tương đồng vector, nhờ đó truy vấn mô tả nội dung vẫn tìm được video dù không trùng chữ nào trong tiêu đề.
+* gRPC hai chiều hoạt động: **api_service** cung cấp metadata cho **search_service**, còn **search_service** gọi ngược lại khi cần xoá video khỏi chỉ mục. File **.proto** dùng chung là nguồn sự thật duy nhất cho cả hai ngôn ngữ.
+* Metadata được đồng bộ bất đồng bộ qua RabbitMQ, kèm dead-letter queue nên thông điệp lỗi không biến mất âm thầm mà được giữ lại để xử lý.
+* Kết thúc giai đoạn phát triển sản phẩm: cả hai service chạy song song ở local và phục vụ được toàn bộ luồng từ upload đến tìm kiếm.
+* Bài học rút ra: dùng cả gRPC lẫn message queue trong cùng một hệ thống chỉ hợp lý khi tách bạch mục đích — gRPC cho lời gọi cần trả lời ngay, hàng đợi cho việc chấp nhận trễ và cần bảo đảm không mất.

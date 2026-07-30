@@ -5,51 +5,28 @@ weight: 1
 chapter: false
 pre: " <b> 1.1. </b> "
 ---
-**⚠️ Note: The following information is for reference purposes only. Please do not copy verbatim for your own report, including this warning.**
-
 
 ### Week 1 Objectives:
 
-* Connect and get acquainted with members of First Cloud AI Journey.
-* Understand basic AWS services, how to use the console & CLI.
+* Define the scope of **VideoPlatformServer** and model the data for the whole system.
+* Scaffold **api_service** on NestJS 11 with a code-first GraphQL setup.
+* Complete user authentication and session management.
 
 ### Tasks to be carried out this week:
-| Day | Task                                                                                                                                                                                                   | Start Date | Completion Date | Reference Material                        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------- | ----------------------------------------- |
-| 2   | - Get acquainted with FCAJ members <br> - Read and take note of internship unit rules and regulations                                                                                                   | 08/11/2025 | 08/11/2025      |
-| 3   | - Learn about AWS and its types of services <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                              | 08/12/2025 | 08/12/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Create AWS Free Tier account <br> - Learn about AWS Console & AWS CLI <br> - **Practice:** <br>&emsp; + Create AWS account <br>&emsp; + Install & configure AWS CLI <br> &emsp; + How to use AWS CLI | 08/13/2025 | 08/13/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Learn basic EC2: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - SSH connection methods to EC2 <br> - Learn about Elastic IP   <br>                            | 08/14/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Practice:** <br>&emsp; + Launch an EC2 instance <br>&emsp; + Connect via SSH <br>&emsp; + Attach an EBS volume                                                                                     | 08/15/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
 
+| Day | Task | Start Date | Completion Date | Reference Material |
+| --- | --- | --- | --- | --- |
+| 2 | - Gather requirements and lock the product scope: upload → transcode → playback → search <br> - Draw the data flow and set the boundary between the two services | 06/22/2026 | 06/22/2026 | |
+| 3 | - Bootstrap the NestJS 11 project <br> - Configure **ConfigModule** with schema validation for environment variables <br> - Enable code-first GraphQL, auto-generating **schema.gql** | 06/23/2026 | 06/23/2026 | |
+| 4 | - Design the Prisma schema for PostgreSQL: <br>&emsp; + **User**, **Video**, **VideoInformation** <br>&emsp; + **Comment**, **LikeVideo**, **Subscribe**, **WatchHistory** <br>&emsp; + Status enums: **UploadVideoStatus**, **ProcessingStatus**, **VideoVisibility** <br> - Run the first migration | 06/24/2026 | 06/25/2026 | |
+| 5 | - **auth** module: verify Firebase ID tokens <br> - **SessionService** storing sessions in Redis <br> - Guard and **@CurrentUser** decorator for resolvers | 06/25/2026 | 06/26/2026 | |
+| 6 | - Write unit tests for **auth.service**, **auth.resolver**, **session.service** <br> - **Practice:** stand up the local environment with Docker Compose (PostgreSQL, Redis, RabbitMQ) | 06/26/2026 | 06/26/2026 | |
 
 ### Week 1 Achievements:
 
-* Understood what AWS is and mastered the basic service groups: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
-
-* Successfully created and configured an AWS Free Tier account.
-
-* Became familiar with the AWS Management Console and learned how to find, access, and use services via the web interface.
-
-* Installed and configured AWS CLI on the computer, including:
-  * Access Key
-  * Secret Key
-  * Default Region
-  * ...
-
-* Used AWS CLI to perform basic operations such as:
-
-  * Check account & configuration information
-  * Retrieve the list of regions
-  * View EC2 service
-  * Create and manage key pairs
-  * Check information about running services
-  * ...
-
-* Acquired the ability to connect between the web interface and CLI to manage AWS resources in parallel.
-* ...
+* Settled the product scope and split the system into two services with clear responsibilities: **api_service** owns business logic and relational data, **search_service** owns semantic search.
+* Finished the data schema with 11 tables and 8 status enums. Splitting **Video** from **VideoInformation** keeps frequently-changing metadata from locking the main table.
+* **api_service** runs locally and generates its GraphQL schema from code, so no schema file has to be maintained by hand.
+* Authentication works end to end: Firebase-issued tokens are verified server-side and sessions live in Redis, so they can be revoked without waiting for token expiry.
+* Every dependency (PostgreSQL, Redis, RabbitMQ) comes up with a single **docker compose up**, which cut setup time for the following weeks.
+* Lesson learned: designing the status enums up front mattered more than expected — the entire week 2 transcode flow is driven by them.

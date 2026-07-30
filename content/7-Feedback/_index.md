@@ -6,40 +6,60 @@ chapter: false
 pre: " <b> 7. </b> "
 ---
 
-**⚠️ Note: The information below is for reference purposes only. Please do not copy verbatim for your report, including this warning.**
+### Overall evaluation
 
-> Here, you can freely share your personal opinions about your experience participating in the First Cloud AI Journey program. This will help the FCAJ team improve any shortcomings based on the following aspects:
+**1. Working environment**
 
-### Overall Evaluation
+What stood out most about the program was being able to choose my own topic and own it from beginning to end. Nobody handed me a list of tasks; I had to decide what to build, in what order, and live with the consequences when I decided wrong.
 
-**1. Working Environment**  
-The working environment is very friendly and open. FCAJ members are always willing to help whenever I encounter difficulties, even outside working hours. The workspace is tidy and comfortable, helping me focus better. However, I think it would be nice to have more social gatherings or team bonding activities to strengthen relationships.
+That is both the strength and the difficulty. A strength, because it forces real understanding rather than following instructions. A difficulty, because nobody stops you when you head the wrong way — the mistake only surfaces when the system fails to run, and by then it has usually cost a few days.
 
-**2. Support from Mentor / Team Admin**  
-The mentor provides very detailed guidance, explains clearly when I don’t understand, and always encourages me to ask questions. The admin team supports administrative tasks, provides necessary documents, and creates favorable conditions for me to work effectively. I especially appreciate that the mentor allows me to try and solve problems myself instead of just giving the answer.
+**2. Support from mentor / team admin**
 
-**3. Relevance of Work to Academic Major**  
-The tasks I was assigned align well with the knowledge I learned at university, while also introducing me to new areas I had never encountered before. This allowed me to both strengthen my foundational knowledge and gain practical skills.
+The admin team answered my questions throughout the process of learning AWS. For someone meeting an ecosystem that broad for the first time, having answers at the right moment kept me from committing to several wrong directions early on.
 
-**4. Learning & Skill Development Opportunities**  
-During the internship, I learned many new skills such as using project management tools, teamwork skills, and professional communication in a corporate environment. The mentor also shared valuable real-world experiences that helped me better plan my career path.
+**3. Relevance of the work to my academic major**
 
-**5. Company Culture & Team Spirit**  
-The company culture is very positive: everyone respects each other, works seriously but still keeps things enjoyable. When there are urgent projects, everyone works together and supports one another regardless of their position. This made me feel like a real part of the team, even as an intern.
+The development half sat squarely within my field: database design, APIs, asynchronous processing, testing. The infrastructure half was almost entirely new. At university, networking is taught as theory; the moment you have to decide which subnet goes where and which security group references which, that same knowledge turns into something else entirely.
 
-**6. Internship Policies / Benefits**  
-The company provides an internship allowance and offers flexible working hours when needed. In addition, having the opportunity to join internal training sessions is a big plus.
+That gap was the most valuable thing I got. Without the program I would have had no reason to build a real system on AWS with my own money and time.
 
----
+**4. Learning and skill development opportunities**
 
-### Additional Questions
-- What did you find **most satisfying** during your internship?  
-- What do you think the company **should improve** for future interns?  
-- If recommending to a friend, would you **suggest they intern here**? Why or why not?  
+Things I learned that I can point to concretely:
 
----
+* Designing a private network on AWS: subnets, route tables, and why a genuinely private subnet must have no route to the Internet.
+* Security groups that reference one another instead of opening IP ranges — this changed how I think about network permissions altogether.
+* VPC Endpoints and their real cost, including the fact that they are not cheaper than a NAT Gateway as I first assumed.
+* Deploying containers on ECS Fargate, and why deployment order matters as much as configuration.
+* Federated authentication with OIDC instead of static access keys — for me the most valuable security lesson of the program.
+* How to write technical documentation someone else can reproduce, rather than documentation that proves I did the work.
 
-### Suggestions & Expectations
-- Do you have any suggestions to improve the internship experience?  
-- Would you like to continue this program in the future?  
-- Any other comments (free sharing):
+**5. Culture and team spirit**
+
+Requiring everyone to publish a weekly worklog and blog creates a healthy kind of pressure: knowing the work will be read changes how carefully it is recorded. Reading other people's write-ups was also how I gauged where I stood.
+
+**6. Internship policies and benefits**
+
+The material at [cloudjourney.awsstudygroup.com](https://cloudjourney.awsstudygroup.com/) is a significant benefit, particularly because it exists in Vietnamese. For anyone meeting AWS for the first time, reading a new concept in their first language before checking it against the original English documentation saves a great deal of time.
+
+### Additional questions
+
+**What did I find most satisfying during the internship?**
+
+The moment I typed my own domain into a browser and the system answered correctly — after passing through Route 53, CloudFront, the ALB, and finally a container I had packaged myself. Until then I had only ever run applications on my own machine.
+
+**What should the program improve for future cohorts?**
+
+There should be a session, or at least a document, on **estimating cost before building**. I only realised that eight VPC Endpoints cost more than one NAT Gateway after building all eight. For anyone paying for their own account, that is something to know beforehand, not afterwards.
+
+**Would I recommend it to a friend?**
+
+Yes, with one caveat: this program only pays off if the participant picks a genuinely demanding topic. Choose something small and safe, and six weeks will pass without much being learned.
+
+### Suggestions and expectations
+
+* **Add a VPC Endpoint workshop.** While looking for reference material I noticed that the cloudjourney catalogue covers VPC, VPC Peering, and Transit Gateway, but has no dedicated lab on VPC Endpoints — even though they are mandatory for anyone running containers in a private subnet, and were the cause of the hardest failure I had to diagnose.
+* **Add a resource cleanup checklist.** Many services keep charging when idle. A standard checklist would spare learners a surprise bill after the program ends.
+* **Encourage Infrastructure as Code earlier.** Had it been suggested at the start, I would have built the infrastructure with CloudFormation instead of by hand through the console.
+* **On continuing:** I intend to keep developing this system after the internship, starting by fixing the single-Availability-Zone weakness and moving the whole infrastructure into code.

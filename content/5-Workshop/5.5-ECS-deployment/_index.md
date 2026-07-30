@@ -10,13 +10,13 @@ This is the section where the platform actually starts running. Three services g
 
 | Service | Container ports | CPU / memory |
 |---|---|---|
-| `qdrant` | 6333 HTTP, 6334 gRPC | 0.25 vCPU / 2 GB |
-| `search-service` | 8000 HTTP, 50052 gRPC | 4 vCPU / 9 GB |
-| `api-service` | 8080 HTTP, 50051 gRPC | 2 vCPU / 5 GB |
+| **qdrant** | 6333 HTTP, 6334 gRPC | 0.25 vCPU / 2 GB |
+| **search-service** | 8000 HTTP, 50052 gRPC | 4 vCPU / 9 GB |
+| **api-service** | 8080 HTTP, 50051 gRPC | 2 vCPU / 5 GB |
 
-`search-service` gets the largest allocation because it runs the embedding model in-process — `fastembed` loads the model into memory and is CPU-bound while generating vectors. `api-service` needs headroom for FFmpeg transcoding. Qdrant is small at this data volume.
+**search-service** gets the largest allocation because it runs the embedding model in-process — **fastembed** loads the model into memory and is CPU-bound while generating vectors. **api-service** needs headroom for FFmpeg transcoding. Qdrant is small at this data volume.
 
-**Build order matters here.** Qdrant must be running before `search-service` starts, because `search-service` connects to it during startup. Create the services in the order given on this page.
+**Build order matters here.** Qdrant must be running before **search-service** starts, because **search-service** connects to it during startup. Create the services in the order given on this page.
 
 #### Create the ECR repositories
 
@@ -24,9 +24,9 @@ This is the section where the platform actually starts running. Three services g
 
 | Repository name | Settings |
 |---|---|
-| `video-platform/api-service` | Private, scan on push enabled |
-| `video-platform/search-service` | Private, scan on push enabled |
-| `video-platform/qdrant` | Private, scan on push enabled |
+| **video-platform/api-service** | Private, scan on push enabled |
+| **video-platform/search-service** | Private, scan on push enabled |
+| **video-platform/qdrant** | Private, scan on push enabled |
 
 **Scan on push** runs a vulnerability scan against every image you upload, at no extra cost. There is no reason to leave it off.
 
@@ -36,7 +36,7 @@ Images built by GitHub Actions are stored here.
 
 ![ecr images](/images/5-Workshop/5.5-ECS-deployment/ecr-images.png)
 
-The `:latest` tag is fine for this first manual deployment. Section 5.7 switches to commit-SHA tags, which is what you want for anything repeatable — `:latest` makes it impossible to tell which build a running task came from, and rollback becomes guesswork.
+The **:latest** tag is fine for this first manual deployment. Section 5.7 switches to commit-SHA tags, which is what you want for anything repeatable — **:latest** makes it impossible to tell which build a running task came from, and rollback becomes guesswork.
 
 #### Create the IAM roles
 
@@ -44,7 +44,7 @@ ECS uses two distinct roles, and mixing them up is a common source of confusion.
 
 **The task execution role** is used by the ECS agent *before* your container starts — to pull the image, read SSM parameters, and create log streams. **The task role** is used by your application code *while it runs* — to call S3, for example.
 
-Create `ecsTaskExecutionRole`: **IAM** → **Roles** → **Create role** → **AWS service** → **Elastic Container Service Task**. Attach the managed policy `AmazonECSTaskExecutionRolePolicy`, then add an inline policy for Parameter Store:
+Create **ecsTaskExecutionRole**: **IAM** → **Roles** → **Create role** → **AWS service** → **Elastic Container Service Task**. Attach the managed policy **AmazonECSTaskExecutionRolePolicy**, then add an inline policy for Parameter Store:
 
 ```
 {
@@ -79,9 +79,9 @@ Create `ecsTaskExecutionRole`: **IAM** → **Roles** → **Create role** → **A
 }
 ```
 
-The KMS key is the account's default `aws/ssm` key unless you created your own; find its ID under **KMS** → **AWS managed keys**.
+The KMS key is the account's default **aws/ssm** key unless you created your own; find its ID under **KMS** → **AWS managed keys**.
 
-Now create `vspTaskRole` with the same trust policy, and give it the permissions the application itself needs:
+Now create **vspTaskRole** with the same trust policy, and give it the permissions the application itself needs:
 
 ```
 {
@@ -101,7 +101,7 @@ Now create `vspTaskRole` with the same trust policy, and give it the permissions
 }
 ```
 
-The `ssmmessages` block enables ECS Exec, which lets you open a shell inside a running task. On a private subnet with no bastion host, that is the only way to debug a container interactively — and it is worth having before something goes wrong rather than after.
+The **ssmmessages** block enables ECS Exec, which lets you open a shell inside a running task. On a private subnet with no bastion host, that is the only way to debug a container interactively — and it is worth having before something goes wrong rather than after.
 
 #### Create the service discovery namespace
 
@@ -111,13 +111,13 @@ The three services need to find each other by name. Fargate task IPs change on e
 
 | Setting | Value |
 |---|---|
-| Namespace name | `vsp.internal` |
+| Namespace name | **vsp.internal** |
 | Instance discovery | API calls and DNS queries in VPCs |
 | VPC | the VPC from 5.3.1 |
 
 ![name space](/images/5-Workshop/5.5-ECS-deployment/namespace.png)
 
-This creates a Route 53 private hosted zone attached to the VPC. When an ECS service registers with it, each task gets an `A` record, so `api.vsp.internal` resolves to the current task IP from anywhere inside the VPC. This is what makes the `GRPC_SEARCH_URL` and `QDRANT_URL` parameters from 5.4 work.
+This creates a Route 53 private hosted zone attached to the VPC. When an ECS service registers with it, each task gets an **A** record, so **api.vsp.internal** resolves to the current task IP from anywhere inside the VPC. This is what makes the **GRPC_SEARCH_URL** and **QDRANT_URL** parameters from 5.4 work.
 
 #### Create the cluster and log groups
 
@@ -125,7 +125,7 @@ This creates a Route 53 private hosted zone attached to the VPC. When an ECS ser
 
 | Setting | Value |
 |---|---|
-| Cluster name | `vsp-ecs-cluster` |
+| Cluster name | **vsp-ecs-cluster** |
 | Infrastructure | AWS Fargate (serverless) |
 | Container Insights | Enabled |
 
@@ -269,7 +269,7 @@ Then create three CloudWatch log groups — **CloudWatch** → **Log groups** �
 }
 ```
 
-Pin the Qdrant image to a specific version rather than `:latest`. A vector database that silently upgrades itself during a redeploy can change index formats underneath you.
+Pin the Qdrant image to a specific version rather than **:latest**. A vector database that silently upgrades itself during a redeploy can change index formats underneath you.
 
 #### Task definition 2 — search-service
 
@@ -443,9 +443,9 @@ Pin the Qdrant image to a specific version rather than `:latest`. A vector datab
 }
 ```
 
-Note the split between `secrets` and `environment`. Values under `secrets` are pulled from Parameter Store at task startup and never appear in the console; values under `environment` are stored in the task definition as plain text. Anything with a password goes in `secrets`.
+Note the split between **secrets** and **environment**. Values under **secrets** are pulled from Parameter Store at task startup and never appear in the console; values under **environment** are stored in the task definition as plain text. Anything with a password goes in **secrets**.
 
-The `startPeriod` of 120 seconds matters for this container. `fastembed` downloads and loads the embedding model on first start, which takes well over a minute. Without a generous start period, the health check fails during model loading and ECS kills the task before it ever becomes ready — producing an endless restart loop that looks like a crash.
+The **startPeriod** of 120 seconds matters for this container. **fastembed** downloads and loads the embedding model on first start, which takes well over a minute. Without a generous start period, the health check fails during model loading and ECS kills the task before it ever becomes ready — producing an endless restart loop that looks like a crash.
 
 #### Task definition 3 — api-service
 
@@ -669,14 +669,14 @@ The `startPeriod` of 120 seconds matters for this container. `fastembed` downloa
 
 Before the API starts, the schema has to exist. Run the migration as a one-off task rather than baking it into the container startup — a migration that runs on every task boot will race with itself the moment you have more than one task.
 
-**Clusters** → `vsp-ecs-cluster` → **Tasks** → **Run new task**:
+**Clusters** → **vsp-ecs-cluster** → **Tasks** → **Run new task**:
 
 | Setting | Value |
 |---|---|
 | Launch type | FARGATE |
-| Task definition | `vsp-api-service` |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-ecs-tasks-sg` |
+| Task definition | **vsp-api-service** |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-ecs-tasks-sg** |
 | Public IP | Disabled |
 
 Under **Container overrides**, set the command to:
@@ -685,26 +685,26 @@ Under **Container overrides**, set the command to:
 npx,prisma,migrate,deploy
 ```
 
-The console expects a comma-separated list, not a shell string. Run the task and watch the `/ecs/vsp-api-service` log group in CloudWatch until it exits with code 0.
+The console expects a comma-separated list, not a shell string. Run the task and watch the **/ecs/vsp-api-service** log group in CloudWatch until it exits with code 0.
 
 #### Create the three services
 
-Now create the ECS services, **in this order**. For each: **Clusters** → `vsp-ecs-cluster` → **Services** → **Create**.
+Now create the ECS services, **in this order**. For each: **Clusters** → **vsp-ecs-cluster** → **Services** → **Create**.
 
 **1. Qdrant**
 
 | Setting | Value |
 |---|---|
-| Task definition | `vsp-qdrant` |
-| Service name | `qdrant` |
+| Task definition | **vsp-qdrant** |
+| Service name | **qdrant** |
 | Desired tasks | 1 |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-qdrant-sg` |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-qdrant-sg** |
 | Public IP | Disabled |
-| Service discovery | Enable, namespace `vsp.internal`, service name `qdrant` |
+| Service discovery | Enable, namespace **vsp.internal**, service name **qdrant** |
 | Load balancing | None |
 
-Wait until the task is `RUNNING` before continuing.
+Wait until the task is **RUNNING** before continuing.
 
 ![qdrant](/images/5-Workshop/5.5-ECS-deployment/qdrant-service.png)
 
@@ -712,13 +712,13 @@ Wait until the task is `RUNNING` before continuing.
 
 | Setting | Value |
 |---|---|
-| Task definition | `vsp-search-service` |
-| Service name | `search-service` |
+| Task definition | **vsp-search-service** |
+| Service name | **search-service** |
 | Desired tasks | 1 |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-ecs-tasks-sg`, `vsp-grpc-search-sg` |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-ecs-tasks-sg**, **vsp-grpc-search-sg** |
 | Public IP | Disabled |
-| Service discovery | Enable, service name `search-service` |
+| Service discovery | Enable, service name **search-service** |
 | Load balancing | None for now — added in 5.6 |
 | Deployment failure detection | Enable rollback on failure |
 
@@ -728,18 +728,18 @@ Wait until the task is `RUNNING` before continuing.
 
 | Setting | Value |
 |---|---|
-| Task definition | `vsp-api-service` |
-| Service name | `api-service` |
+| Task definition | **vsp-api-service** |
+| Service name | **api-service** |
 | Desired tasks | 1 |
-| Subnet | `10.0.10.0/24` |
-| Security groups | `vsp-ecs-tasks-sg`, `vsp-grpc-api-sg` |
+| Subnet | **10.0.10.0/24** |
+| Security groups | **vsp-ecs-tasks-sg**, **vsp-grpc-api-sg** |
 | Public IP | Disabled |
-| Service discovery | Enable, service name `api-service` |
+| Service discovery | Enable, service name **api-service** |
 | Load balancing | None for now — added in 5.6 |
 | Deployment failure detection | Enable rollback on failure |
 
 ![api](/images/5-Workshop/5.5-ECS-deployment/api.png)
 
-Attach **two** security groups to each application service: the shared `vsp-ecs-tasks-sg` for HTTP, plus its own gRPC group. This is where the split from 5.3.2 pays off.
+Attach **two** security groups to each application service: the shared **vsp-ecs-tasks-sg** for HTTP, plus its own gRPC group. This is where the split from 5.3.2 pays off.
 
 **Deployment failure detection** turns on the ECS circuit breaker. If a new deployment cannot reach a steady state, ECS stops it and rolls back to the previous task definition automatically instead of leaving the service in a broken half-deployed state.

@@ -22,21 +22,21 @@ Trên GitHub: **Actions** → **Deploy to ECS** → **⋯** → **Disable workfl
 
 CloudFront chậm, nên hãy bắt đầu sớm và để nó chạy trong lúc bạn xóa những thứ khác.
 
-**CloudFront** → distribution của bạn → **Disable**, chờ trạng thái chuyển sang `Deployed` (có thể tới 15 phút), rồi **Delete**.
+**CloudFront** → distribution của bạn → **Disable**, chờ trạng thái chuyển sang **Deployed** (có thể tới 15 phút), rồi **Delete**.
 
 Không thể xóa một distribution khi nó còn đang bật. Không có cách nào bỏ qua bước disable hay làm nó nhanh hơn.
 
 #### 3. Xóa bản ghi Route 53
 
-**Route 53** → hosted zone của bạn → chọn bản ghi A tên `app` → **Delete record**.
+**Route 53** → hosted zone của bạn → chọn bản ghi A tên **app** → **Delete record**.
 
-Giữ lại chính hosted zone nếu bạn còn định dùng tên miền — nó tốn 0.50 USD mỗi tháng. Chỉ xóa khi bạn dứt hẳn với tên miền đó, và lưu ý rằng không thể xóa một zone vẫn còn bản ghi khác ngoài `NS` và `SOA` mặc định.
+Giữ lại chính hosted zone nếu bạn còn định dùng tên miền — nó tốn 0.50 USD mỗi tháng. Chỉ xóa khi bạn dứt hẳn với tên miền đó, và lưu ý rằng không thể xóa một zone vẫn còn bản ghi khác ngoài **NS** và **SOA** mặc định.
 
 #### 4. Xóa load balancer và target group
 
-**EC2** → **Load balancers** → `vsp-alb` → **Delete**.
+**EC2** → **Load balancers** → **vsp-alb** → **Delete**.
 
-Sau đó vào **Target groups** → xóa `vsp-api-tg` và `vsp-search-tg`.
+Sau đó vào **Target groups** → xóa **vsp-api-tg** và **vsp-search-tg**.
 
 Target group phải xóa sau ALB; một target group đang gắn vào listener thì không xóa được.
 
@@ -56,7 +56,7 @@ done
 aws ecs delete-cluster --cluster vsp-ecs-cluster
 ```
 
-`--force` cho phép xóa service mà không cần hạ số task trước, nhưng hạ về 0 trước vẫn khiến quá trình xóa nhanh và gọn hơn.
+**--force** cho phép xóa service mà không cần hạ số task trước, nhưng hạ về 0 trước vẫn khiến quá trình xóa nhanh và gọn hơn.
 
 Task definition không tốn phí nên có thể để lại. Nếu vẫn muốn dọn, hãy deregister từng revision:
 
@@ -67,7 +67,7 @@ aws ecs deregister-task-definition --task-definition vsp-api-service:1
 
 #### 6. Xóa Cloud Map namespace
 
-**AWS Cloud Map** → `vsp.internal` → xóa ba service đã đăng ký trước (`api-service`, `search-service`, `qdrant`), rồi mới xóa namespace.
+**AWS Cloud Map** → **vsp.internal** → xóa ba service đã đăng ký trước (**api-service**, **search-service**, **qdrant**), rồi mới xóa namespace.
 
 Một namespace còn service đăng ký thì không xóa được. Nếu các service không chịu xóa, khả năng cao vẫn còn một ECS service đang giữ đăng ký — hãy kiểm tra lại bước 5 đã hoàn tất chưa.
 
@@ -75,13 +75,13 @@ Một namespace còn service đăng ký thì không xóa được. Nếu các se
 
 Đây mới là chỗ thực sự tốn tiền.
 
-**Amazon MQ** → `vsp-mq` → **Delete**. Việc xóa broker mất vài phút.
+**Amazon MQ** → **vsp-mq** → **Delete**. Việc xóa broker mất vài phút.
 
-**RDS** → `vsp-rds-postgresql` → **Delete**. Bỏ tick **Create final snapshot** trừ khi bạn muốn giữ dữ liệu — snapshot vẫn bị tính phí lưu trữ. Bạn phải gõ `delete me` để xác nhận.
+**RDS** → **vsp-rds-postgresql** → **Delete**. Bỏ tick **Create final snapshot** trừ khi bạn muốn giữ dữ liệu — snapshot vẫn bị tính phí lưu trữ. Bạn phải gõ **delete me** để xác nhận.
 
-**ElastiCache** → xóa `vsp-api-redis` và `vsp-search-redis`, chọn không tạo backup cuối.
+**ElastiCache** → xóa **vsp-api-redis** và **vsp-search-redis**, chọn không tạo backup cuối.
 
-**EFS** → `vsp-qdrant-efs` → xóa mount target trước, rồi mới xóa file system.
+**EFS** → **vsp-qdrant-efs** → xóa mount target trước, rồi mới xóa file system.
 
 **S3** → bucket phải rỗng thì mới xóa được:
 
@@ -113,7 +113,7 @@ aws ecr delete-repository --repository-name video-platform/api-service --force
 aws ecr delete-repository --repository-name video-platform/search-service --force
 ```
 
-Cần `--force` vì trong repository vẫn còn image.
+Cần **--force** vì trong repository vẫn còn image.
 
 #### 10. Xóa phần mạng
 
@@ -121,23 +121,23 @@ Giờ mới tới lượt VPC. Xóa VPC từ console sẽ kéo theo subnet, rout
 
 Xóa security group trước, theo thứ tự sau:
 
-1. `vsp-vpce-sg`, `vsp-efs-sg`
-2. `vsp-rds-sg`, `vsp-redis-api-sg`, `vsp-redis-search-sg`, `vsp-rabbitmq-sg`, `vsp-qdrant-sg`
-3. `vsp-grpc-api-sg` và `vsp-grpc-search-sg` — **hãy gỡ inbound rule của cả hai trước khi xóa bất kỳ cái nào**, vì chúng tham chiếu lẫn nhau
-4. `vsp-ecs-tasks-sg`
-5. `vsp-alb-sg`
+1. **vsp-vpce-sg**, **vsp-efs-sg**
+2. **vsp-rds-sg**, **vsp-redis-api-sg**, **vsp-redis-search-sg**, **vsp-rabbitmq-sg**, **vsp-qdrant-sg**
+3. **vsp-grpc-api-sg** và **vsp-grpc-search-sg** — **hãy gỡ inbound rule của cả hai trước khi xóa bất kỳ cái nào**, vì chúng tham chiếu lẫn nhau
+4. **vsp-ecs-tasks-sg**
+5. **vsp-alb-sg**
 
 Sau đó vào **VPC** → VPC của bạn → **Delete VPC**.
 
 {{% notice note %}}
-Lỗi `DependencyViolation` trên một security group gần như luôn có nghĩa là vẫn còn một network interface tồn tại. ECS task và RDS instance sau khi xóa vẫn để lại ENI trong vài phút. Hãy chờ rồi thử lại — hoặc tìm ra thứ đang giữ nó bằng `aws ec2 describe-network-interfaces --filters "Name=group-id,Values=<sg-id>"`.
+Lỗi **DependencyViolation** trên một security group gần như luôn có nghĩa là vẫn còn một network interface tồn tại. ECS task và RDS instance sau khi xóa vẫn để lại ENI trong vài phút. Hãy chờ rồi thử lại — hoặc tìm ra thứ đang giữ nó bằng **aws ec2 describe-network-interfaces --filters "Name=group-id,Values=<sg-id>"**.
 {{% /notice %}}
 
 #### 11. Xóa chứng chỉ, tham số và IAM role
 
-**ACM** → xóa cả hai chứng chỉ, ở `us-east-1` và `ap-southeast-1`. Một chứng chỉ đang được distribution sử dụng thì không xóa được, nên bước này phải làm sau bước 2.
+**ACM** → xóa cả hai chứng chỉ, ở **us-east-1** và **ap-southeast-1**. Một chứng chỉ đang được distribution sử dụng thì không xóa được, nên bước này phải làm sau bước 2.
 
-**Systems Manager** → Parameter Store → xóa mọi thứ dưới `/vsp/`:
+**Systems Manager** → Parameter Store → xóa mọi thứ dưới **/vsp/**:
 
 ```
 aws ssm get-parameters-by-path --path /vsp --recursive \
@@ -145,9 +145,9 @@ aws ssm get-parameters-by-path --path /vsp --recursive \
   | xargs -n 10 aws ssm delete-parameters --names
 ```
 
-**CloudWatch** → xóa ba log group `/ecs/vsp-*`.
+**CloudWatch** → xóa ba log group **/ecs/vsp-\***.
 
-**IAM** → xóa `ecsTaskExecutionRole`, `vspTaskRole` và `GitHubActionsDeployRole`, cùng với OIDC provider nếu bạn không còn repository nào khác dùng tới nó.
+**IAM** → xóa **ecsTaskExecutionRole**, **vspTaskRole** và **GitHubActionsDeployRole**, cùng với OIDC provider nếu bạn không còn repository nào khác dùng tới nó.
 
 #### Kiểm tra xem còn sót gì không
 

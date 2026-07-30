@@ -26,9 +26,9 @@ In this workshop we use VPC Endpoints and **create no NAT Gateway at all**. This
 
 The platform consists of two independent application services plus a self-hosted vector database, all running as ECS Fargate services in the same private subnet:
 
-+ **`api-service`** (NestJS + Apollo GraphQL) — handles authentication, video CRUD, generating presigned upload URLs for S3, and running the asynchronous transcoding worker. It listens on port `8080` for HTTP/GraphQL and `50051` for gRPC.
-+ **`search-service`** (Python FastAPI) — handles hybrid search and keeps the vector index in sync. It listens on port `8000` for HTTP and `50052` for gRPC.
-+ **`qdrant`** — a self-hosted vector database storing video embeddings, with its data persisted on an Amazon EFS file system so the index survives task restarts.
++ **api-service** (NestJS + Apollo GraphQL) — handles authentication, video CRUD, generating presigned upload URLs for S3, and running the asynchronous transcoding worker. It listens on port **8080** for HTTP/GraphQL and **50051** for gRPC.
++ **search-service** (Python FastAPI) — handles hybrid search and keeps the vector index in sync. It listens on port **8000** for HTTP and **50052** for gRPC.
++ **qdrant** — a self-hosted vector database storing video embeddings, with its data persisted on an Amazon EFS file system so the index survives task restarts.
 
 Around them sit the managed services: **Amazon RDS for PostgreSQL** for relational metadata, **Amazon ElastiCache for Valkey** for sessions, caching, and the BullMQ job queue, **Amazon MQ (RabbitMQ)** for asynchronous messaging between the two services, and **Amazon S3** for both raw and transcoded video files.
 
