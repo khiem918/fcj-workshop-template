@@ -77,9 +77,7 @@ Sau đó tạo hai cụm với engine là **Valkey**:
 
 ![tạo elasticache](/images/5-Workshop/5.4-Data-layer/create-valkey.png)
 
-{{% notice warning %}}
-Nếu bật **encryption in transit**, ứng dụng bắt buộc phải kết nối bằng TLS. Trên thực tế nghĩa là chuỗi kết nối phải dùng `rediss://` thay vì `redis://`, và với `ioredis` hay BullMQ thì client cần thêm `tls: {}` trong phần tùy chọn. Một client cấu hình dạng plaintext sẽ treo ở bước kết nối chứ không trả về lỗi rõ ràng — quá trình bắt tay đơn giản là không bao giờ hoàn tất.
-{{% /notice %}}
+**Nếu bật encryption in transit, ứng dụng bắt buộc phải kết nối bằng TLS. Trên thực tế nghĩa là chuỗi kết nối phải dùng `rediss://` thay vì `redis://`, và với `ioredis` hay BullMQ thì client cần thêm `tls: {}` trong phần tùy chọn. Một client cấu hình dạng plaintext sẽ treo ở bước kết nối chứ không trả về lỗi rõ ràng — quá trình bắt tay đơn giản là không bao giờ hoàn tất.**
 
 Copy **Primary endpoint** của từng cụm khi chúng chuyển sang `available`.
 

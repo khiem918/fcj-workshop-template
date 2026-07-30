@@ -12,9 +12,7 @@ Before building anything, prepare the AWS account, the local tools, and the sour
 
 This workshop uses the **Asia Pacific (Singapore) — `ap-southeast-1`** region throughout. Create every resource in this region: ECS tasks, RDS, ElastiCache, and Amazon MQ must all sit in the same VPC, and a mismatched region is the most common cause of resources that cannot see each other.
 
-{{% notice warning %}}
-**AWS Certificate Manager is the one exception.** A certificate used by CloudFront must be requested in **US East (N. Virginia) — `us-east-1`**, regardless of where the rest of your stack lives. Section 5.6 covers this in detail.
-{{% /notice %}}
+**AWS Certificate Manager is the one exception. A certificate used by CloudFront must be requested in US East (N. Virginia) — `us-east-1`, regardless of where the rest of your stack lives. Section 5.6 covers this in detail.**
 
 #### IAM permissions
 

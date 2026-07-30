@@ -10,9 +10,7 @@ Phần lớn kiến trúc này tính tiền theo giờ bất kể có ai dùng h
 
 Hãy xóa mọi thứ theo đúng thứ tự dưới đây. Thứ tự có ý nghĩa: AWS từ chối xóa một tài nguyên khi vẫn còn thứ khác phụ thuộc vào nó, và đi ngược chuỗi phụ thuộc sẽ tránh được một loạt lần xóa thất bại.
 
-{{% notice warning %}}
-Thao tác này xóa vĩnh viễn toàn bộ dữ liệu — database, chỉ mục vector, và mọi video đã upload. Nếu muốn giữ lại thứ gì, hãy tạo snapshot cuối cho RDS và tải các object trên S3 về trước khi bắt đầu.
-{{% /notice %}}
+**Thao tác này xóa vĩnh viễn toàn bộ dữ liệu — database, chỉ mục vector, và mọi video đã upload. Nếu muốn giữ lại thứ gì, hãy tạo snapshot cuối cho RDS và tải các object trên S3 về trước khi bắt đầu.**
 
 #### 1. Dừng pipeline
 

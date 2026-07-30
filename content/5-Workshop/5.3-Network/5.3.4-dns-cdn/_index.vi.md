@@ -34,9 +34,7 @@ Nếu bạn đăng ký tên miền **qua Route 53**, việc ủy quyền đã xo
 | `example.com` + `*.example.com` | **`us-east-1`** | CloudFront |
 | `example.com` + `*.example.com` | `ap-southeast-1` | Application Load Balancer |
 
-{{% notice warning %}}
-CloudFront chỉ chấp nhận chứng chỉ được cấp ở **US East (N. Virginia) — `us-east-1`**. Đây không phải một tùy chọn hay giá trị mặc định có thể đổi, mà là ràng buộc cứng, vì CloudFront là dịch vụ toàn cầu với control plane đặt tại region đó. Một chứng chỉ cấp ở `ap-southeast-1` sẽ đơn giản là không xuất hiện trong danh sách chọn chứng chỉ của CloudFront, mà không kèm bất kỳ lời giải thích nào.
-{{% /notice %}}
+**CloudFront chỉ chấp nhận chứng chỉ được cấp ở US East (N. Virginia) — `us-east-1`. Đây không phải một tùy chọn hay giá trị mặc định có thể đổi, mà là ràng buộc cứng, vì CloudFront là dịch vụ toàn cầu với control plane đặt tại region đó. Một chứng chỉ cấp ở `ap-southeast-1` sẽ đơn giản là không xuất hiện trong danh sách chọn chứng chỉ của CloudFront, mà không kèm bất kỳ lời giải thích nào.**
 
 Với từng chứng chỉ: mở **AWS Certificate Manager**, kiểm tra lại bộ chọn region ở góc trên bên phải cho đúng, rồi chọn **Request** → **Request a public certificate**.
 

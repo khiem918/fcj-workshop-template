@@ -10,9 +10,7 @@ Most of this architecture bills by the hour whether anyone uses it or not. Amazo
 
 Delete everything in the order below. The order matters: AWS refuses to delete a resource while something else still depends on it, and working backwards through the dependency chain avoids a long sequence of failed delete attempts.
 
-{{% notice warning %}}
-This deletes all data permanently — the database, the vector index, and every uploaded video. If you want to keep anything, take a final RDS snapshot and download the S3 objects before starting.
-{{% /notice %}}
+**This deletes all data permanently — the database, the vector index, and every uploaded video. If you want to keep anything, take a final RDS snapshot and download the S3 objects before starting.**
 
 #### 1. Stop the pipeline
 

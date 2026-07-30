@@ -59,9 +59,7 @@ Identity provider mới chỉ nói với AWS rằng nó tin chữ ký của GitH
 
 Đặt tên role là **`GitHubActionsDeployRole`** — tên này phải khớp với biến `AWS_ROLE_ARN` ở bước kế tiếp.
 
-{{% notice warning %}}
-Điều kiện `sub` chính là toàn bộ ranh giới bảo mật của thiết lập này. Bỏ nó đi, hoặc thay bằng `"token.actions.githubusercontent.com:sub": "*"`, thì **bất kỳ** workflow GitHub Actions nào trong **bất kỳ** repository nào trên GitHub cũng có thể nhận vai này và deploy vào tài khoản của bạn. Riêng điều kiện `aud` không giới hạn được gì cả — mọi token OIDC của GitHub đều mang audience là `sts.amazonaws.com`.
-{{% /notice %}}
+**Điều kiện `sub` chính là toàn bộ ranh giới bảo mật của thiết lập này. Bỏ nó đi, hoặc thay bằng `"token.actions.githubusercontent.com:sub": "*"`, thì bất kỳ workflow GitHub Actions nào trong bất kỳ repository nào trên GitHub cũng có thể nhận vai này và deploy vào tài khoản của bạn. Riêng điều kiện `aud` không giới hạn được gì cả — mọi token OIDC của GitHub đều mang audience là `sts.amazonaws.com`.**
 
 Giá trị `sub` ở trên giới hạn việc nhận vai vào đúng nhánh `main` của một repository. Hai biến thể thường gặp:
 

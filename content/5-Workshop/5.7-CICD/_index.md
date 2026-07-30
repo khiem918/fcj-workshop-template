@@ -59,9 +59,7 @@ On the permissions page, attach the **deployment permissions policy you created 
 
 Name the role **`GitHubActionsDeployRole`** — this must match the `AWS_ROLE_ARN` variable in the next step.
 
-{{% notice warning %}}
-The `sub` condition is the entire security boundary of this setup. Omit it, or replace it with `"token.actions.githubusercontent.com:sub": "*"`, and **any** GitHub Actions workflow in **any** repository on GitHub can assume this role and deploy into your account. The `aud` check alone does not restrict anything — every GitHub OIDC token carries `sts.amazonaws.com` as its audience.
-{{% /notice %}}
+**The `sub` condition is the entire security boundary of this setup. Omit it, or replace it with `"token.actions.githubusercontent.com:sub": "*"`, and any GitHub Actions workflow in any repository on GitHub can assume this role and deploy into your account. The `aud` check alone does not restrict anything — every GitHub OIDC token carries `sts.amazonaws.com` as its audience.**
 
 The `sub` value above restricts assumption to the `main` branch of one repository. Two common variations:
 

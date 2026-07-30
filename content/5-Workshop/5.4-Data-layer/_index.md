@@ -77,9 +77,7 @@ Then create two clusters with **Valkey** as the engine:
 
 ![create elasticache](/images/5-Workshop/5.4-Data-layer/create-valkey.png)
 
-{{% notice warning %}}
-If you enable **encryption in transit**, the application must connect with TLS. In practice that means the connection string uses `rediss://` rather than `redis://`, and for `ioredis` or BullMQ the client needs `tls: {}` in its options. A client configured for plaintext will hang on connect rather than returning a clear error — the handshake simply never completes.
-{{% /notice %}}
+**If you enable encryption in transit, the application must connect with TLS. In practice that means the connection string uses `rediss://` rather than `redis://`, and for `ioredis` or BullMQ the client needs `tls: {}` in its options. A client configured for plaintext will hang on connect rather than returning a clear error — the handshake simply never completes.**
 
 Copy the **Primary endpoint** of each cluster once they reach `available`.
 

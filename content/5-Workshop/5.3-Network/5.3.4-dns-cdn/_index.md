@@ -34,9 +34,7 @@ This is the part that catches people out: you need **two certificates for the sa
 | `example.com` + `*.example.com` | **`us-east-1`** | CloudFront |
 | `example.com` + `*.example.com` | `ap-southeast-1` | Application Load Balancer |
 
-{{% notice warning %}}
-CloudFront only accepts certificates from **US East (N. Virginia) — `us-east-1`**. This is not a preference or a default that can be changed; it is a hard constraint, because CloudFront is a global service whose control plane lives in that region. A certificate issued in `ap-southeast-1` will simply not appear in the CloudFront distribution's certificate dropdown, with no explanation as to why.
-{{% /notice %}}
+**CloudFront only accepts certificates from US East (N. Virginia) — `us-east-1`. This is not a preference or a default that can be changed; it is a hard constraint, because CloudFront is a global service whose control plane lives in that region. A certificate issued in `ap-southeast-1` will simply not appear in the CloudFront distribution's certificate dropdown, with no explanation as to why.**
 
 For each certificate: open **AWS Certificate Manager**, confirm the region selector in the top-right corner is correct, then **Request** → **Request a public certificate**.
 

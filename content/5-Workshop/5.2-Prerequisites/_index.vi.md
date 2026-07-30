@@ -12,9 +12,7 @@ Trước khi bắt tay xây dựng, hãy chuẩn bị tài khoản AWS, các cô
 
 Workshop này dùng region **Asia Pacific (Singapore) — `ap-southeast-1`** xuyên suốt. Hãy tạo mọi tài nguyên trong region này: ECS task, RDS, ElastiCache và Amazon MQ đều phải nằm trong cùng một VPC, và chọn nhầm region là nguyên nhân phổ biến nhất khiến các tài nguyên không nhìn thấy nhau.
 
-{{% notice warning %}}
-**AWS Certificate Manager là ngoại lệ duy nhất.** Chứng chỉ dùng cho CloudFront bắt buộc phải được tạo ở **US East (N. Virginia) — `us-east-1`**, bất kể phần còn lại của hệ thống nằm ở đâu. Phần 5.6 sẽ nói kỹ về điều này.
-{{% /notice %}}
+**AWS Certificate Manager là ngoại lệ duy nhất. Chứng chỉ dùng cho CloudFront bắt buộc phải được tạo ở US East (N. Virginia) — `us-east-1`, bất kể phần còn lại của hệ thống nằm ở đâu. Phần 5.6 sẽ nói kỹ về điều này.**
 
 #### Quyền IAM
 
