@@ -14,3 +14,6 @@ This blog compares four common AWS deployment strategies — Big Bang, Rolling, 
 ###  [Blog 2 - ZERO-SECRET DEPLOYMENT WITH SECRETS MANAGER + IAM ROLE + IMDSV2](3.2-Blog2/)
 A field-report style blog on a real incident: a corrupted Firebase private key caused by improper newline escaping in **jq**, and the resulting refactor to a zero-secret deployment pipeline using AWS Secrets Manager, IAM Role, and IMDSv2 — including a revisit of the 2019 Capital One breach and how IMDSv2 mitigates that exact attack path.
 
+###  [Blog 3 - WHEN A PUBLIC LOAD BALANCER WON'T "TELL" YOU ITS PRIVATE IP — AND HOW TO BUILD YOUR OWN INTERNAL DNS ZONE FOR ALB/NLB](3.3-Blog3/)
+This blog explains why an internet-facing ALB/NLB's DNS name only ever resolves to public IPs, and walks through a CloudTrail + EventBridge + Lambda + Route 53 Private Hosted Zone automation (based on an AWS article by Gonzalo Escarrá) that keeps an internal DNS record for the load balancer's private IPs continuously up to date.
+
